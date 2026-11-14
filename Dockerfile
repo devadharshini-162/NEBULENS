@@ -10,7 +10,7 @@ COPY frontend/ ./
 RUN bun run build
 
 # Stage 2: Python Backend & Static Server
-FROM python:3.11-slim
+FROM python:3.12-slim
 
 WORKDIR /app
 
