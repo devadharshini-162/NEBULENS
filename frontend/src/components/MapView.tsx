@@ -282,7 +282,14 @@ export const MapView: React.FC = () => {
   const onEachDistrict = (feature: any, layer: any) => {
     const distName = feature?.properties?.district_name;
     layer.on({
-      click: () => setRegion({ type: 'district', id: distName, name: distName }),
+      click: (e: L.LeafletMouseEvent) => {
+        // If the user is currently in drawing mode, do not trigger district selection
+        if (drawMode) {
+          return;
+        }
+        L.DomEvent.stopPropagation(e);
+        setRegion({ type: 'district', id: distName, name: distName });
+      },
     });
   };
 
@@ -295,7 +302,15 @@ export const MapView: React.FC = () => {
       `<strong>Cell:</strong> ${cellId}<br/><strong>Fires:</strong> ${count.toFixed(1)}<br/><strong>FRP:</strong> ${frp.toFixed(1)} MW<br/><em>Click to inspect</em>`,
       { sticky: true }
     );
-    layer.on({ click: () => setRegion({ type: 'cell', id: cellId, name: cellId }) });
+    layer.on({
+      click: (e: L.LeafletMouseEvent) => {
+        if (drawMode) {
+          return;
+        }
+        L.DomEvent.stopPropagation(e);
+        setRegion({ type: 'cell', id: cellId, name: cellId });
+      },
+    });
   };
 
   const exportMapPng = async () => {
@@ -451,7 +466,7 @@ export const MapView: React.FC = () => {
 
             {showGrid && gridGeo && (
               <GeoJSON
-                key={`grid-${state.activeAnalysisDate}-${dailyData.length}`}
+                key={`grid-${state.activeAnalysisDate}-${dailyData.length}-${drawMode}`}
                 data={gridGeo}
                 style={gridStyle}
                 onEachFeature={onEachGridCell}
@@ -460,7 +475,7 @@ export const MapView: React.FC = () => {
 
             {showDistricts && districtsGeo && (
               <GeoJSON
-                key={`districts-${state.region.id}`}
+                key={`districts-${state.region.id}-${drawMode}`}
                 data={districtsGeo}
                 style={districtStyle}
                 onEachFeature={onEachDistrict}
