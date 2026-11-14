@@ -1,7 +1,7 @@
 import React from 'react';
 import { useApp } from '../context/AppContext';
 import type { SupportedSensor, DataInterpretation } from '../types';
-import { Flame, ShieldAlert, Satellite, Calendar, MapPin, SlidersHorizontal } from 'lucide-react';
+import { ShieldAlert, Satellite, Calendar, MapPin, SlidersHorizontal } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { state, setSensor, setInterpretation, resetFilters } = useApp();
@@ -61,7 +61,7 @@ export const Header: React.FC = () => {
     <header className="app-header">
       <div className="header-top">
         <div className="brand-section">
-          <Flame className="brand-icon" size={28} />
+          <img src="/logo.svg" alt="NEBULENS Logo" className="brand-icon-logo" width="34" height="34" />
           <div>
             <h1 className="brand-title">NEBULENS</h1>
             <span className="brand-subtitle">
