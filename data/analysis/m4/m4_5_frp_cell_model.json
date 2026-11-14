@@ -1,0 +1,14 @@
+{
+  "model_name": "Model_B_Cell_Total_FRP",
+  "algorithm": "HuberRegressor(epsilon=1.35)",
+  "features": [
+    "log1p_frp_modis",
+    "log_exposure"
+  ],
+  "coefficients": {
+    "intercept": -0.053953659503805006,
+    "log1p_frp_modis": 0.7687322313113699,
+    "log_exposure": 0.1420865621116577
+  },
+  "scale": 0.8042956076193825
+}

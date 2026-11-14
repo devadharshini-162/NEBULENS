@@ -1,0 +1,14 @@
+category,sample_size,sample_pct,coverage_80_pct,nominal_80_target,coverage_95_pct,nominal_95_target,mean_width_80,mean_width_95,evaluation_status,scientific_note
+Overall (Marginal),362080,100.0,94.33246796288113,80.0,96.97497790543527,95.0,4.8517261378700836,8.873884224480777,PASS,Driven by high zero-fraction; meets nominal threshold
+Zero-Fire (V = 0),317043,87.5615885992046,99.97161268345303,80.0,99.9981075122302,95.0,0.9381755787069893,2.0055481433117905,PASS,Driven by high zero-fraction; meets nominal threshold
+Active-Fire (V >= 1),45037,12.438411400795404,54.635077824899525,80.0,75.69331882674246,95.0,32.40160312631836,57.22430446077669,FAIL (Under-covered),Severe undercoverage due to MODIS zero-detection omission
+Strata: V = 1,23239,6.4181948740609815,83.00701407117346,80.0,100.0,95.0,1.7120788329962562,3.16747708593313,PASS,Within nominal bounds
+Strata: V = 2,8850,2.4442112240388862,40.632768361581924,80.0,71.05084745762711,95.0,2.0003389830508476,3.610282485875706,FAIL (Under-covered),Severe undercoverage due to MODIS zero-detection omission
+Strata: V = 3-5,8133,2.2461886875828547,11.45948604451002,80.0,42.7763432927579,95.0,2.9344645272347227,5.17004795278495,FAIL (Under-covered),Severe undercoverage due to MODIS zero-detection omission
+Strata: V = 6-10,2925,0.8078325231992929,12.102564102564102,80.0,16.923076923076923,95.0,5.265641025641026,9.208205128205128,FAIL (Under-covered),Severe undercoverage due to MODIS zero-detection omission
+Strata: V > 10,1890,0.5219840919133893,22.962962962962962,80.0,31.164021164021165,95.0,720.9063492063492,1271.253439153439,FAIL (Under-covered),Severe undercoverage due to MODIS zero-detection omission
+Landcover: Cropland & Mosaic (Inland / Dryland),156488,43.219178082191775,94.910152855171,80.0,97.15952660906908,95.0,1.4239174888809365,2.586032155820255,PASS,Evaluated on mixed zero and active observations
+Landcover: Cropland (Intensive / Delta),34224,9.452054794520548,94.55937353903693,80.0,97.72089761570828,95.0,0.7328190743338009,1.787780504908836,PASS,Evaluated on mixed zero and active observations
+Landcover: Forest & Woodland,74152,20.47945205479452,94.85381378789513,80.0,97.75461214802029,95.0,18.396779587873556,33.22812601143597,PASS,Evaluated on mixed zero and active observations
+Landcover: Shrubland & Savanna (Southern Semi-Arid),71176,19.65753424657534,92.68573676520175,80.0,95.67550859840395,95.0,1.2777059683039227,2.6505001685961562,PASS,Evaluated on mixed zero and active observations
+Landcover: Urban / Developed Corridor,26040,7.191780821917808,93.57910906298002,80.0,96.2173579109063,95.0,2.0624807987711216,3.633026113671275,PASS,Evaluated on mixed zero and active observations

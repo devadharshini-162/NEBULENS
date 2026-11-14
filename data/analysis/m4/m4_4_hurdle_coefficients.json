@@ -1,0 +1,8 @@
+{
+  "step_B_val_mae": 1.536,
+  "step_C_val_mae": 0.3695,
+  "mae_improvement_pct": 75.94401041666667,
+  "step_B_val_zero_misfit_pct": 4.88,
+  "step_C_val_zero_misfit_pct": 2.41,
+  "promoted_over_step_B": false
+}

@@ -1,0 +1,1111 @@
+NEBULENS — Research-Backed Methodology & Implementation Plan
+
+Nov 14, 2026 · @Deva Dharshini
+
+1. Project summary and locked decisions
+
+NEBULENS compares MODIS and VIIRS active-fire detections over Tamil Nadu on a common equal-area grid, day by day, and estimates how much of an apparent change in fire activity could come from the sensors instead of from the fires themselves.
+
+Locked decisions
+
+Decision
+
+Final choice
+
+Note
+
+Study region
+
+Tamil Nadu, India
+
+State boundary polygon; offshore detections clipped out
+
+Harmonised outputs
+
+Hotspot counts and FRP
+
+Modelled separately, because counts and FRP do not behave alike across sensors
+
+Matching approach
+
+Daily grid-based harmonisation
+
+Acquisition timestamps are kept; overpass-level pairing is used only as a validation diagnostic
+
+Application
+
+React + FastAPI
+
+DuckDB over Parquet first, PostGIS later
+
+Data source
+
+NASA FIRMS, standard-quality MODIS C6.1 and VIIRS 375 m
+
+Near-real-time (NRT) monitoring is added last
+
+Spatial grid
+
+10 km equal-area square grid (EPSG:6933)
+
+5 km and 25 km kept as sensitivity checks
+
+Day definition
+
+Indian Standard Time calendar day (UTC+5:30)
+
+UTC time stored alongside, so a night overpass is not split across two dates
+
+Reference scale
+
+VIIRS 375 m-equivalent
+
+Pre-2012 values are predicted from MODIS and labelled as predictions
+
+Scientific boundary. NEBULENS produces comparable estimates; it does not claim that MODIS and VIIRS measure the same thing. Original observations are preserved untouched, sensor effects are modelled explicitly, and every adjustment must pass the validation tests in section 4 before the app shows it as "harmonised".
+
+Research questions
+
+How do MODIS and VIIRS hotspot counts and FRP differ over Tamil Nadu, by season, day versus night, scan angle and land cover?
+
+Can a validated calibration make the two records comparable across 2000 to the latest standard-quality date?
+
+How much of an apparent change in fire activity is associated with observation conditions rather than fire?
+
+Does the calibration hold on years and places it was not trained on?
+
+2. System architecture and data model
+
+NEBULENS keeps what the satellites observed separate from what the model derives, so every derived number can be traced back to its source records.
+
+architecture · 4 layers, 2 views
+
+Rows run top to bottom as the four layers: acquisition and storage, harmonisation, analysis, web application. The API serves the observed view from the observations and daily grid, and the harmonised view from the harmonised table and analysis outputs.
+
+Two views of the same data. The observed view shows what MODIS and VIIRS each detected, independently. The harmonised view shows derived, calibrated, comparable estimates. The app lets the user switch between them, and every harmonised row states whether it is an observed VIIRS value or a prediction made from MODIS.
+
+Four layers
+
+Layer
+
+Job
+
+Main components
+
+1. Data acquisition
+
+Fetch MODIS and VIIRS records; keep sensor identity and quality fields
+
+FIRMS area API and archive download, download manifest
+
+2. Harmonisation engine
+
+Standardise, grid, compare sensors, calibrate, estimate uncertainty
+
+GeoPandas, DuckDB, statsmodels, scikit-learn, XGBoost
+
+3. Analysis engine
+
+Historical comparison, anomalies, seasonal patterns, FRP trends, attribution
+
+Python modules over the gridded and harmonised tables
+
+4. Web application
+
+Interactive explorer and reports
+
+FastAPI, React, MapLibre
+
+Three-part data architecture. The original MODIS and VIIRS data are never physically merged.
+
+Part
+
+Contents
+
+Rule
+
+Raw
+
+FIRMS files exactly as downloaded, plus a manifest (request, time, row count, checksum)
+
+Never edited
+
+Observations
+
+One row per detection in a common schema
+
+Adds fields; never drops sensor-specific ones
+
+Derived
+
+grid_daily, harmonised_daily, coverage, uncertainty, calibration outputs
+
+Every row carries a processing_version and a link back to its source records
+
+Common observation schema. A shared field name does not mean an identical measurement.
+
+Identity: observation_id, sensor_family (MODIS or VIIRS), satellite, instrument, source_product (for example MODIS_SP), version (collection, and whether NRT or standard)
+
+Place and time: latitude, longitude, acq_datetime_utc, analysis_date_ist, daynight, grid_cell_id
+
+Measurement: frp_mw, confidence_raw (MODIS 0 to 100; VIIRS l, n or h), confidence_class, scan, track
+
+Sensor-specific, kept as delivered: brightness and bright_t31 (MODIS); bright_ti4 and bright_ti5 (VIIRS)
+
+Flags added by NEBULENS: in_tn, type_flag (non-vegetation or static source), persistent_flag, duplicate_group
+
+Storage stack. Start light and add weight only when a measured need appears.
+
+Purpose
+
+Technology
+
+When
+
+Raw files
+
+Files on disk, one per source-month, with manifest
+
+Milestone M1
+
+Observation and aggregate tables
+
+Parquet, partitioned by sensor and year
+
+M2
+
+Analytical queries
+
+DuckDB
+
+M2 onward
+
+Spatial processing
+
+GeoPandas, Shapely, PyProj
+
+M2 onward
+
+Interactive regional queries at scale
+
+PostGIS
+
+Only if DuckDB misses the latency target in M7
+
+The analysis grid is a square equal-area grid in EPSG:6933, so area maths stay simple. H3 hexagons were considered but not chosen as the primary grid.
+
+How a user query runs
+
+The user selects a region (state, district or drawn area), which becomes a spatial filter on grid cells.
+
+The selected date range is applied.
+
+The user picks MODIS, VIIRS or harmonised.
+
+The API returns precomputed grid aggregates for regional views.
+
+Individual detections load only when the user zooms in or opens a hotspot.
+
+Repository layout
+
+nebulens/  pipeline/      # download, standardise, grid, calibrate, validate  backend/       # FastAPI app  frontend/      # React app  data/raw/      # untouched FIRMS downloads + manifest (not committed)  data/parquet/  # observations, grid_daily, harmonised_daily  notebooks/     # exploration, one per milestone  docs/          # decisions, methodology, model card, data dictionary
+
+3. Data sources and availability
+
+The record starts in November 2000 for MODIS and January 2012 for VIIRS, so only 2012 onward can be compared directly; earlier years are MODIS-only and are never shown as if VIIRS had observed them.
+
+Dataset
+
+FIRMS source ID
+
+Coverage
+
+Role in NEBULENS
+
+MODIS Terra and Aqua, C6.1 active fire, 1 km
+
+MODIS_SP
+
+Terra from Nov 2000, Aqua from Jul 2002
+
+Long record; calibration input and back-cast source
+
+VIIRS Suomi-NPP, 375 m
+
+VIIRS_SNPP_SP
+
+From 20 Jan 2012
+
+Reference scale; overlap with MODIS
+
+VIIRS NOAA-20, 375 m
+
+VIIRS_NOAA20_SP
+
+From 2018 (confirm exact start in M1)
+
+Second VIIRS platform
+
+VIIRS NOAA-21, 375 m
+
+VIIRS_NOAA21_NRT in the API; archive from 17 Jan 2024
+
+Standard-quality availability checked in M1
+
+Added only if a standard product exists
+
+VIIRS 750 m M-band active fire
+
+NASA Earthdata Search
+
+Designed for continuity with MODIS 1 km
+
+Optional extra comparison pathway
+
+MCD64A1 C6.1 burned area, monthly, 500 m
+
+University of Maryland and LP DAAC
+
+MODIS era
+
+Independent evidence of burned land
+
+VNP64A1 burned area, 500 m grid
+
+University of Maryland and LP DAAC
+
+VIIRS era
+
+Optional cross-check of MCD64A1
+
+Access. The FIRMS area API returns CSV for a bounding box: /api/area/csv/{MAP_KEY}/{SOURCE}/{west,south,east,north}/{DAY_RANGE}/{DATE}. The MAP_KEY is free, the limit is 5,000 transactions per 10 minutes, and /api/data_availability/ reports which dates each source covers. Use 5 days or fewer per request. Covering 2000 to the cutoff takes roughly 4,000 requests across all sources, well inside the limit. The archive download tool is the cross-check route.
+
+Tamil Nadu extent. Request roughly west 76.2, south 8.0, east 80.4, north 13.6, a little wider than the state, then clip to the official boundary polygon. Treat these bounds as approximate until the polygon is loaded in M0.
+
+Data pitfalls and how the plan handles them
+
+Pitfall
+
+Handling
+
+NRT and standard data mixed
+
+Standard replaces NRT as it becomes available (NASA pages say about 2 months in one place and about 5 months in another). Read the cutoff from data_availability, keep the version field, never mix in one series.
+
+Archive file naming
+
+A NASA Earthdata Forum user reported S-NPP downloads after September 2022 landing in a file named nrt rather than archive. Reconcile row counts against the API for sample months (task M1.6).
+
+Confidence scales differ
+
+MODIS confidence is numeric and VIIRS is low, nominal or high; FIRMS states they are not the same scale. Keep the raw value, derive a class per sensor, filter each sensor independently.
+
+Static and non-vegetation heat sources
+
+The type attribute in standard data separates vegetation fire, volcano, static land source and offshore. Keep rows flagged; exclude non-vegetation types from the main series. Tamil Nadu has industrial heat sources and a long coastline.
+
+Day boundary
+
+Night overpasses fall either side of midnight UTC. The analysis day is the IST calendar day; UTC time is kept.
+
+Overpass times drift
+
+Nominal local times (VIIRS about 13:30 and 01:30) are not guaranteed over 26 years. Build per-year acquisition-time histograms (task M2.9).
+
+Terra has no coincident VIIRS pass
+
+If Terra's nominal morning overpass holds, no VIIRS pass is near-simultaneous with it, so Terra can only be compared on the daily grid. This supports the daily-grid decision.
+
+Monsoon cloud
+
+The northeast monsoon brings heavy cloud over Tamil Nadu, cutting valid observations. Coverage proxies and exposure terms are part of calibration (M3, M4).
+
+The exact end date of standard data is not fixed here; the pipeline reads it from the availability endpoint on the day it runs.
+
+4. Methodology
+
+The method runs in five steps: clean and flag, aggregate daily on the grid, calibrate, validate, then analyse; a model reaches the app only if it passes validation.
+
+4.1 Cleaning and flagging
+
+Clip to the Tamil Nadu polygon. Offshore rows are marked, not deleted.
+
+Flag non-vegetation types and persistent hotspots (the same location detected on many distinct days each year; the threshold is tuned in M2).
+
+Platforms that overlap in time, such as S-NPP and NOAA-20, can see the same fire on the same day. Group those into a duplicate_group so repeat sightings are not counted as separate fires. The original rows stay.
+
+Never remove a MODIS detection because VIIRS also saw something nearby. Matching identifies candidate correspondences; it does not merge or delete.
+
+4.2 Daily grid aggregation
+
+Every cell-day gets the same set of measures, for each sensor family.
+
+Measure
+
+Definition
+
+n_det
+
+Raw detections in the cell that day
+
+n_unique
+
+Detections after collapsing each duplicate_group
+
+frp_sum, frp_mean, frp_max
+
+FRP totals and extremes from detections that report FRP
+
+active_fire_day
+
+1 if n_det is above 0
+
+Day and night split
+
+Every count and FRP measure also kept separately for day and night
+
+Platform split
+
+Counts per satellite (Terra, Aqua, S-NPP, NOAA-20, NOAA-21)
+
+Scan-angle bins
+
+Detections binned by the scan value, a proxy for viewing angle
+
+overpass_times
+
+The distinct acquisition-time clusters seen in the cell that day
+
+Zero rows are kept for every cell-day so the count models see the zeros. That is about 1,300 cells times about 9,500 days, roughly 12 million rows for the full record, which Parquet handles comfortably.
+
+Overpass-level diagnostic (not the main pipeline). For Aqua and VIIRS, which both pass at about 13:30 local time, build a pair-link table of candidate near-simultaneous detections. Starting thresholds are a centroid distance of about 1 km and a time gap of 15 minutes, tuned in M3 with sensitivity at 0.5 and 2 km and 10 and 30 minutes. This follows the near-simultaneous matching used by Fu et al. (2020). The table feeds validation and the FRP model only; it never changes the daily counts.
+
+4.3 Calibration
+
+Calibration predicts the VIIRS-equivalent value for a cell-day from the MODIS observation, with observation opportunity as an exposure term. A regression on raw counts alone is not trusted.
+
+\log \mathbb{E}[V_{c,d}] = \log(e_{c,d}) + \beta_0 + \beta_1 \log(1 + M_{c,d}) + \gamma_{\text{season}(d)} + \delta_{\text{landcover}(c)} + \theta^{\top} z_{c,d}
+
+Here V is the VIIRS count in cell c on day d, M is the MODIS count, e is the exposure (observation opportunity), and z holds coverage and geometry covariates such as day or night share, scan-angle mix and platform. If zeros make daily fits unstable, the fallback is weekly cell totals; M3 checks the zero fraction and M4 checks convergence and calibration plots before that choice is made.
+
+Model ladder
+
+Step
+
+Model
+
+Role
+
+A
+
+Robust linear regression (Theil-Sen or Huber) on monthly regional totals
+
+Interpretable baseline
+
+B
+
+Negative binomial GLM with exposure offset (Poisson checked first)
+
+Main count model
+
+C
+
+Zero-inflated or hurdle negative binomial
+
+Only if zeros misfit in B
+
+D
+
+Gradient boosting (XGBoost or LightGBM)
+
+Only if it beats B on held-out data
+
+E
+
+Hierarchical model with district and land-cover effects
+
+Optional
+
+A more complex model replaces a simpler one only if it improves held-out error and calibration by a margin fixed before the test data are opened, and does not worsen the sensor-transition test.
+
+FRP is modelled separately from counts, in two parts. First, per-fire FRP in Aqua and VIIRS linked pairs, with scan angle as a covariate: Li et al. (2018) found MODIS mean FRP can rise by up to 300% at the scan edge relative to nadir, while VIIRS stays fairly stable across the swath. Second, total FRP per cell-day using a log-scale robust or gamma model with the same exposure terms. The split matters because Fu et al. (2020) found MODIS FRP higher for fires both sensors saw, yet monthly total FRP higher for VIIRS because MODIS misses more fires. Those two effects must not be blended into one number.
+
+Exposure and coverage, in three tiers. FIRMS files list only detections, so an empty cell-day says nothing about whether a sensor looked there. Coverage therefore needs help.
+
+Tier 1, from the detection records: day and night presence, overpass clusters, scan-angle mix.
+
+Tier 2, auxiliary data: a daily cloud-cover covariate (source chosen in M3) and orbit-based overpass counts.
+
+Tier 3, advanced: a detection-probability operator after Sofiev and Kouznetsov (2026), who estimate a MODIS C6.1 detection limit of about 3.7 MW for a nadir clear-sky night retrieval, up to 40 MW for a daytime side view, and about 0.5 MW for VIIRS at night. This is a research direction, not a promise to reproduce the paper in full; their code is archived on Zenodo.
+
+Outputs for every cell-day
+
+Output
+
+Meaning
+
+Observed MODIS
+
+What MODIS detected, untouched
+
+Observed VIIRS
+
+What VIIRS detected, untouched
+
+Expected sensor-specific value
+
+What each sensor would be expected to record under comparable conditions
+
+Harmonised estimate
+
+VIIRS-equivalent value, with h_source set to observed_viirs or predicted_from_modis
+
+Uncertainty
+
+80% and 95% intervals from a block bootstrap by year, checked against held-out data
+
+4.4 Validation
+
+Validation is mandatory, not a late extra. The harmonisation has to show it improves comparability on data it was not fitted on. Splits are by time and by spatial block, never random, because neighbouring cells and consecutive days would otherwise leak into the test set and make results look better than they are.
+
+Test
+
+Question
+
+Design
+
+Pass rule
+
+Overlap period
+
+Do the sensors keep a consistent relationship?
+
+Fit on 2012 to 2020 overlap; check each year
+
+Yearly ratio or slope inside the bootstrap interval
+
+Seasonal
+
+Is the seasonal profile preserved?
+
+Monthly profile of predicted versus observed VIIRS
+
+Correlation and peak-month agreement above thresholds fixed in M4
+
+Land cover
+
+Does it work across ecosystems?
+
+Error reported per land-cover class
+
+No class hidden; poor classes flagged in the app
+
+Spatial
+
+Does it work in unseen places?
+
+Leave one spatial block out (blocks wide enough that neighbours do not leak)
+
+Held-out error within the agreed margin of fitted error
+
+Temporal
+
+Does it hold in later years?
+
+Train 2012 to 2020, test 2021 to the standard-data cutoff
+
+Error and calibration within the agreed margin
+
+Sensor transition
+
+Are artificial jumps reduced?
+
+Level-shift test at the joins (Jan 2012, NOAA-20 start, NOAA-21 start), raw versus harmonised
+
+Shift smaller in the harmonised series
+
+Uncertainty
+
+Does it show where it is unreliable?
+
+Coverage of 80% and 95% intervals on held-out data
+
+Coverage near nominal; wider intervals where it is weaker
+
+All numeric thresholds are written into the config in M4, before the test data are opened, so they cannot be tuned to the result. A failed test is reported, and the affected output stays labelled "not validated" in the app.
+
+4.5 Sensor impact and fire-activity attribution
+
+This module decides how an apparent change should be described. It reports an evidence assessment, never a single claimed cause, because hotspot records alone cannot prove why a count changed.
+
+Evidence pattern
+
+Possible reading
+
+Count rises, FRP stable, coverage rises
+
+Possible observation effect
+
+Count and FRP both rise
+
+Consistent with increased fire activity
+
+Detections and burned area both rise
+
+Stronger supporting evidence
+
+Count rises while cloud or coverage shifts a lot
+
+Attribution uncertain
+
+Indicators per region and period: change in n_unique against the seasonal baseline, change in FRP (median and total), change in coverage and exposure, change in cloud cover, repeat-detection persistence, spatial spread (number of active cells) and burned-area change. "Changed" is judged against the history of the same region and season using the robust score in 4.6, not against fixed cut-offs.
+
+Output classes: likely sensor-related change, consistent with increased fire activity, mixed effects, insufficient evidence. Each result ships with its evidence table so the user can see why. An illustrative sentence: "Fire detections rose 35% against the historical baseline, but observation coverage also changed, so the rise cannot be attributed entirely to real fire growth." The 35% is an example, not a result.
+
+4.6 Historical comparison and anomaly detection
+
+Start with statistics, not deep learning.
+
+Baseline: the same calendar window across years (March 2026 against earlier Marches, not against February).
+
+Like with like: MODIS-only history is compared with MODIS, harmonised with harmonised. 2000 to 2011 is MODIS only; from 2012 both sensors exist.
+
+Robust score from the rolling median and the median absolute deviation (MAD):
+
+z = 0.6745 \, \frac{x - \operatorname{median}(x_{\text{baseline}})}{\operatorname{MAD}(x_{\text{baseline}})}
+
+A conventional flag threshold of 3.5 is the starting point and is reviewed against Tamil Nadu's own distribution.
+
+Sparse counts break this: in many cells the MAD is zero. Fallback: score at district or state level, or use a negative binomial exceedance quantile instead of z.
+
+Seasonal decomposition is used only at monthly regional level, where enough years exist. Machine-learning anomaly detection is a later extension.
+
+Each comparison reports average monthly detections, total FRP, active-fire days, spatial distribution, anomaly score and, where available, burned area.
+
+4.7 Burned area as independent evidence
+
+A hotspot is a thermal detection at the moment a satellite looks; it does not give burned area in square kilometres. MCD64A1 C6.1 maps monthly burned area at 500 m using surface reflectance and active-fire observations, with burn date and quality layers. NEBULENS aggregates it to the grid and district level and uses it only as supporting evidence in 4.5. It is monthly and may miss very small burns, so it never overrides the daily hotspot record.
+
+5. Web application design
+
+The app is an explorer where a user can see what each sensor detected, see the harmonised view beside it, and ask why a change was flagged.
+
+Stack. React with TypeScript and Vite; MapLibre GL JS for maps; a charting library such as ECharts or Recharts; TanStack Query for data fetching. Backend: FastAPI with Pydantic models, DuckDB reading the Parquet tables.
+
+Features
+
+Feature
+
+What it does
+
+Milestone
+
+Sensor selection
+
+Choose satellite, instrument, product and confidence class; MODIS and VIIRS filter independently
+
+M8.3
+
+Observed or harmonised toggle
+
+Switch views; harmonised rows labelled observed or predicted
+
+M8.3
+
+Date controls
+
+Day, week, month and custom range
+
+M8.4
+
+Map layers
+
+Satellite-specific hotspots, gridded counts and FRP, harmonised activity
+
+M8.2
+
+Historical calendar
+
+Daily heatmap by year for a chosen region and sensor
+
+M8.5
+
+Trend and seasonal comparison
+
+Same season across years; sensor-only history versus the overlap period
+
+M8.6
+
+Hotspot detail panel
+
+Click a detection to investigate it (below)
+
+M8.7
+
+Anomaly view
+
+Anomaly magnitude, historical baseline and a "why was this flagged" evidence panel
+
+M8.8
+
+Coverage and uncertainty
+
+Coverage indicator beside counts; interval bands on harmonised series
+
+M8.9
+
+Export
+
+CSV of the current view and PNG of charts
+
+M8.10
+
+Hotspot detail panel. Sensor, satellite, product and version; date and time (UTC and IST); confidence (raw and class); FRP; nominal pixel size; nearby hotspots; historical detections in the same grid cell; whether both sensors detected activity there; possible repeat detections versus independent events; local land-cover class; anomaly score for the cell; and a link to the original FIRMS record. Repeat sightings of one location must not be presented as separate fire events.
+
+API endpoints (version 1)
+
+Endpoint
+
+Purpose
+
+GET /api/v1/meta/availability
+
+Sensors, date coverage, data version, standard-data cutoff
+
+GET /api/v1/grid/daily
+
+Gridded values for the map: date, sensor, metric, view
+
+GET /api/v1/series
+
+Time series for a cell or region: range, sensor, metric, resolution
+
+GET /api/v1/hotspots
+
+Individual detections for a bounding box and date; only on zoom
+
+GET /api/v1/hotspots/{observation_id}
+
+Detail, nearby detections, cell history
+
+GET /api/v1/compare/seasonal
+
+Same season across chosen years
+
+GET /api/v1/anomalies
+
+Flags, scores and baselines for a region and period
+
+GET /api/v1/attribution
+
+Evidence table and class for a region and period
+
+GET /api/v1/coverage
+
+Coverage and exposure proxies
+
+GET /api/v1/export
+
+CSV of a query
+
+Rules the interface follows
+
+Every series is labelled with its sensor and provenance. Pre-2012 harmonised values are drawn differently and marked as predicted from MODIS.
+
+Regional views use precomputed aggregates; raw detections are fetched only when the user zooms in or opens a hotspot.
+
+Outputs that failed a validation test show a "not validated" tag.
+
+A change in the hotspot count is never shown without its coverage context.
+
+6. Implementation plan
+
+The work is ten milestones, M0 to M9, about 69 focused days in total as a rough estimate. A focused day means roughly three to four hours; rescale to the time you actually have. Each task is sized for a day or less, and each milestone ends with a "done when" check, so progress is measured against the agreed method instead of drifting. Three gates stop the project from moving on too early: Gate A after M3, Gate B after M5, Gate C after M8.
+
+roadmap · 7 phases, 3 gates
+
+The gates are decision points: A decides whether calibration is worth doing, B decides which harmonised outputs go live, and C decides whether the app is ready to release. The highlighted phase is the project's core contribution.
+
+M0. Project foundation (3 days)
+
+Goal: a clean repository and environment, and the Tamil Nadu boundary loaded.
+
+☐ M0.1 Create the nebulens repository with the layout in section 2
+
+☐ M0.2 Set up the Python environment and pin dependencies: pandas, geopandas, pyarrow, duckdb, shapely, pyproj, statsmodels, scikit-learn, xgboost, fastapi, uvicorn, pytest
+
+☐ M0.3 Register a free FIRMS MAP_KEY and keep it in a .env file that is never committed
+
+☐ M0.4 Obtain the Tamil Nadu state and district boundaries, save as GeoParquet, record source and licence
+
+☐ M0.5 Write docs/decisions.md with the locked decisions from section 1
+
+Done when: a fresh clone sets up with documented commands, and the boundary plots correctly over a base map.
+
+M1. Data acquisition and raw store (5 days)
+
+Goal: every available month of standard-quality data for Tamil Nadu, downloaded once and never edited.
+
+☐ M1.1 Call the data_availability endpoint for each source; save the result; fix the standard-data cutoff date
+
+☐ M1.2 Write the downloader: bounding-box requests in 5-day chunks, retries, rate-limit respect, one raw file per source-month
+
+☐ M1.3 Write the manifest: request URL, time, row count and checksum for every file
+
+☐ M1.4 Download MODIS_SP from Nov 2000, VIIRS_SNPP_SP from Jan 2012 and VIIRS_NOAA20_SP from its start, each to the cutoff
+
+☐ M1.5 Check whether NOAA-21 standard data exist; download if so, otherwise park it
+
+☐ M1.6 Cross-check row counts between the API and the archive download tool for at least three sample months, and explain any difference
+
+☐ M1.7 Confirm the version field shows no NRT suffix inside the standard series; list exceptions
+
+Done when: the raw folder has no month gaps up to the cutoff, the manifest is complete, and API and archive counts reconcile.
+
+M2. Standardise, clean and grid (5 days)
+
+Goal: one common observation table and one daily grid table, both reconciled to the raw data.
+
+☐ M2.1 Write the common-schema Parquet writer for MODIS and VIIRS, keeping sensor-specific columns
+
+☐ M2.2 Parse acquisition time to UTC and derive analysis_date_ist
+
+☐ M2.3 Clip to Tamil Nadu and set in_tn
+
+☐ M2.4 Set type_flag and persistent_flag; keep flagged rows
+
+☐ M2.5 Map confidence to a class per sensor following the FIRMS attribute definitions (verify them in the FIRMS documentation first)
+
+☐ M2.6 Build the 10 km EPSG:6933 grid over Tamil Nadu, plus 5 km and 25 km versions
+
+☐ M2.7 Assign grid_cell_id and duplicate_group
+
+☐ M2.8 Aggregate to grid_daily with every measure in 4.2 and zero rows for every cell-day
+
+☐ M2.9 Plot acquisition-time histograms per satellite and year to check overpass drift
+
+☐ M2.10 Write tests: grid counts sum to the detections inside Tamil Nadu for every sensor and year; no duplicate observation_id; timestamps valid
+
+Done when: all tests pass and the reconciliation holds for every sensor-year.
+
+M3. Sensor comparison (7 days) and Gate A
+
+Goal: understand how the two sensors differ over Tamil Nadu before any model is fitted.
+
+☐ M3.1 Draw a timeline of which satellites observed when
+
+☐ M3.2 Compare daily, weekly and monthly counts between MODIS and VIIRS in the overlap: scatter, ratio, split by season and by day versus night
+
+☐ M3.3 Compare FRP distributions per sensor, and per-detection FRP against scan angle
+
+☐ M3.4 Build the Aqua and VIIRS pair-link table; report match rate and omission rate in each direction; report that Terra has no coincident pass (after checking M2.9)
+
+☐ M3.5 Choose a land-cover product, assign each cell and detection a class, and repeat the key comparisons per class
+
+☐ M3.6 Build coverage proxies, tiers 1 and 2; choose the cloud-cover source
+
+☐ M3.7 Measure the zero fraction of cell-days; decide daily versus weekly modelling; compare 5, 10 and 25 km grids
+
+☐ M3.8 Write a two-page findings note with preliminary answers to the four research questions
+
+Done when: the note exists, the grid size and modelling resolution are chosen, and Gate A is decided: if the sensors show no stable relationship worth calibrating, the plan switches to reporting differences without a calibrated output.
+
+M4. Calibration (10 days)
+
+Goal: a harmonised table with uncertainty, produced by models chosen on held-out performance.
+
+☐ M4.1 Freeze the train and test splits (temporal and spatial) and all pass thresholds in a config file before fitting
+
+☐ M4.2 Fit the robust linear baseline on monthly regional totals, counts and FRP
+
+☐ M4.3 Fit the negative binomial GLM with exposure offset; check dispersion, residuals and a calibration plot
+
+☐ M4.4 Add a zero-inflated or hurdle variant only if zeros misfit
+
+☐ M4.5 Fit the two FRP models: per-pair bias against scan angle, and total FRP per cell-day
+
+☐ M4.6 Fit gradient boosting on the same splits and compare with step B of the ladder
+
+☐ M4.7 Produce 80% and 95% intervals by block bootstrap over years
+
+☐ M4.8 Write the harmonised_daily table: the five outputs, h_source and model_version
+
+☐ M4.9 Write the model card: data, splits, metrics, known limits
+
+Done when: harmonised_daily exists with a model card, and the model chosen is the simplest one that met the promotion rule in 4.3.
+
+M5. Validation (7 days) and Gate B
+
+Goal: prove, or fail to prove, that the harmonised data are more comparable than the raw data.
+
+☐ M5.1 Script the seven tests in 4.4 so they run with one command
+
+☐ M5.2 Run the overlap-period and seasonal tests
+
+☐ M5.3 Run the land-cover test and write the per-class table
+
+☐ M5.4 Run the spatial and temporal holdout tests
+
+☐ M5.5 Run the sensor-transition level-shift test at each join
+
+☐ M5.6 Check the empirical coverage of the intervals
+
+☐ M5.7 Produce a validation report with a pass or fail table
+
+Done when: the report is written and Gate B is decided. Harmonised outputs go live in the app only for tests that passed; failed tests are documented and labelled, not hidden.
+
+M6. Analysis engine (8 days)
+
+Goal: historical comparison, anomaly scores and the attribution module working on the tables, before any interface exists.
+
+☐ M6.1 Implement the seasonal baseline and robust score, with the sparse-count fallback from 4.6
+
+☐ M6.2 Compute active-fire days, season length and peak timing per region and year
+
+☐ M6.3 Write the same-season-across-years comparison, keeping sensor-only history separate from the overlap period
+
+☐ M6.4 Find the MODIS tiles that cover Tamil Nadu, download MCD64A1 C6.1, and aggregate monthly burned area to the grid and districts
+
+☐ M6.5 Implement the attribution rules and the evidence table, with thresholds taken from historical distributions
+
+☐ M6.6 Write unit tests on synthetic cases: count up with FRP stable and coverage up should read as sensor-related; count and FRP both up should read as consistent with fire activity
+
+☐ M6.7 Backtest on the known transitions (Jan 2012, NOAA-20 start, NOAA-21 start) and check the module reports a likely sensor effect there
+
+Done when: synthetic tests and the backtest pass, and the module can output "insufficient evidence" instead of forcing a class.
+
+M7. Backend API (6 days)
+
+Goal: the endpoints in section 5, fast and documented.
+
+☐ M7.1 FastAPI skeleton with configuration, health check and automatic OpenAPI docs
+
+☐ M7.2 DuckDB layer over the Parquet tables with query functions
+
+☐ M7.3 Metadata and grid endpoints
+
+☐ M7.4 Series, seasonal comparison and coverage endpoints
+
+☐ M7.5 Hotspot list and hotspot detail endpoints
+
+☐ M7.6 Anomaly and attribution endpoints
+
+☐ M7.7 Response models that always carry provenance: sensor, version, h_source, validated flag
+
+☐ M7.8 Caching and precomputed aggregates; measure latency for regional and hotspot queries
+
+☐ M7.9 pytest suite, CORS settings and example requests
+
+Done when: every endpoint is listed in the generated docs, tests pass, and measured latencies are recorded. Set a latency target before measuring (for example regional queries under one second on a laptop); if DuckDB misses it, evaluate PostGIS.
+
+M8. Frontend (12 days) and Gate C
+
+Goal: the explorer from section 5, one working piece at a time.
+
+☐ M8.1 Vite, React and TypeScript scaffold; routing; shared state for sensor, product, dates, region and view
+
+☐ M8.2 Map: base map, state outline, grid layer, hotspot layer that appears past a zoom threshold
+
+☐ M8.3 Filter panel: satellite, product, confidence, observed or harmonised toggle
+
+☐ M8.4 Date controls: day, week, month, custom range
+
+☐ M8.5 Historical calendar heatmap
+
+☐ M8.6 Time-series and seasonal comparison charts
+
+☐ M8.7 Hotspot detail panel
+
+☐ M8.8 Anomaly view with the "why was this flagged" evidence panel
+
+☐ M8.9 Coverage indicator and uncertainty bands; "not validated" tags
+
+☐ M8.10 CSV and PNG export, responsive layout, basic accessibility checks
+
+Done when: a demo walks through select region, compare sensors, open a hotspot, read an anomaly explanation and export data, without errors. That is Gate C.
+
+M9. Hardening, deployment and write-up (6 days)
+
+Goal: something other people can open, and a method others can check.
+
+☐ M9.1 End-to-end test and clear error and empty states
+
+☐ M9.2 Containerise backend and frontend; choose a host; decide how the Parquet data are shipped
+
+☐ M9.3 Optional: add an NRT monitoring feed as a separate, clearly labelled preliminary layer
+
+☐ M9.4 Write the README, methodology document, model card and data dictionary
+
+☐ M9.5 Draft a short technical report and record a demo video
+
+☐ M9.6 Set a Google Scholar alert for new MODIS and VIIRS harmonisation research and review it monthly
+
+Done when: a public demo link works, and the documentation lets someone else rerun the pipeline from the manifest.
+
+Definition of done for the whole project
+
+☐ Original MODIS and VIIRS observations are preserved and every derived row traces back to them
+
+☐ Counts and FRP both have harmonised outputs with uncertainty
+
+☐ The seven validation tests have been run and the results are published, including failures
+
+☐ The app shows coverage context beside every count change
+
+☐ Every claim in the app about cause is an evidence assessment, never a bare statement of cause
+
+7. Research bibliography, risks and open items
+
+Seven papers shape the method, listed in reading order. Links were checked on 14 November 2026. Findings below come from abstracts and publisher summary pages; read the full papers before quoting numbers in a report.
+
+Research papers
+
+#
+
+Reference
+
+Why it matters here
+
+Link
+
+1
+
+Li, Zhang, Kondragunta and Csiszar (2018). Comparison of Fire Radiative Power Estimates From VIIRS and MODIS Observations. Journal of Geophysical Research: Atmospheres 123(9), 4545-4563
+
+VIIRS FRP is fairly stable across the swath; MODIS mean FRP can be up to 300% higher at the scan edge; the sensors differ about 20% on 1 degree grids in fire-prone regions and the relationship changes with spatial scale. Supports scan-angle terms and separate FRP and count treatment
+
+DOI, NOAA repository
+
+2
+
+Schroeder, Oliva, Giglio and Csiszar (2014). The New VIIRS 375 m active fire detection data product: Algorithm description and initial assessment. Remote Sensing of Environment 143, 85-96
+
+Describes the 375 m algorithm; reports 3 times (day) and 25 times (night) more fire pixels than the VIIRS 750 m baseline, and commission error under 1.2% for nominal-confidence pixels. Raw counts across products are not equivalent
+
+DOI
+
+3
+
+Fu, Li, Wang, Bergeron, Valeria, Chavardes, Wang and Hu (2020). Fire Detection and Fire Radiative Power in Forests and Low-Biomass Lands in Northeast Asia: MODIS versus VIIRS Fire Products. Remote Sensing 12(18), 2870
+
+MODIS missed 65% (forest) and 83% (low-biomass) of VIIRS fire pixels, VIIRS missed 35% and 53% of MODIS pixels; monthly total FRP higher for VIIRS but FRP of jointly detected fires higher for MODIS. Basis for land-cover-aware calibration and near-simultaneous matching
+
+Paper
+
+4
+
+Sofiev and Kouznetsov (2026). Observation operator and detection limits for MODIS and VIIRS Fire Radiative Power products. Geoscientific Model Development 19, 10123
+
+Detection limit as a function of pixel area; about 3.7 MW (MODIS, nadir, clear-sky night) to 40 MW (daytime side view), about 0.5 MW for VIIRS at night; global detection probability of powerful fires 78% for MODIS and 88% for VIIRS. Basis for the advanced Tier 3 operator
+
+DOI, code on Zenodo
+
+5
+
+Vadrevu and Lasko (2018). Intercomparison of MODIS Aqua and VIIRS I-Band Fires and Emissions in an Agricultural Landscape. Remote Sensing 10(7), 978
+
+An Indian precedent (Punjab): VIIRS detected several times more fires than MODIS, monthly FRP was strongly correlated (r squared 0.98), and a MODIS plus VIIRS model was used to extend the record. Close to what NEBULENS attempts, for a different region
+
+DOI, open text
+
+6
+
+Sharma, Wang and Lennartson (2017). Intercomparison of MODIS and VIIRS Fire Products in Khanty-Mansiysk Russia: Implications for Characterizing Gas Flaring from Space. Atmosphere 8(6), 95
+
+Different products and spectral bands respond differently to small, hot sources such as flares. Supports sensor metadata preservation and careful handling of static industrial heat sources
+
+DOI
+
+7
+
+Giglio, Boschetti, Roy, Humber and Justice (2018). The Collection 6 MODIS burned area mapping algorithm and product. Remote Sensing of Environment 217, 72-85
+
+Method behind MCD64A1: 500 m burned area from surface reflectance and active fires; better detection of small burns than the previous collection
+
+DOI, open text
+
+A correction to earlier notes: the 2026 paper is by Sofiev and Kouznetsov, not "Kouznetsov et al.".
+
+Product documentation and data access
+
+Resource
+
+Link
+
+FIRMS area API (and data_availability)
+
+firms.modaps.eosdis.nasa.gov/api/area/csv
+
+Free MAP_KEY registration
+
+firms.modaps.eosdis.nasa.gov/api/map_key
+
+FIRMS archive download
+
+firms2.modaps.eosdis.nasa.gov/download
+
+MODIS and VIIRS attribute definitions
+
+Earthdata attribute tables
+
+VIIRS 375 m active fire data
+
+Earthdata VIIRS I-band page
+
+MODIS Collection 6 active fire user guide (Revision B)
+
+PDF
+
+MCD64A1 Collection 6.1 burned area user guide
+
+PDF
+
+VNP64A1 VIIRS burned area user guide
+
+PDF
+
+MODIS burned area product page
+
+modis-land.gsfc.nasa.gov/burn.html
+
+Risks
+
+Risk
+
+Mitigation
+
+Fire counts in Tamil Nadu are sparse, so models and robust scores can be unstable (MAD of zero)
+
+Weekly or district aggregation; negative binomial exceedance fallback (M3.7, 4.6)
+
+Pre-2012 harmonised values are predictions from MODIS, not observations
+
+Labelled predicted_from_modis, wider intervals, temporal holdout test (M5)
+
+Terra and Aqua overpass times drift, or MODIS data end
+
+Per-year acquisition-time histograms, platform covariate, plan for a VIIRS-only future (M2.9)
+
+Coverage and cloud cannot be seen in detection files
+
+Tiered coverage proxies; outputs that rely on weak proxies are labelled
+
+Findings from other regions may not transfer
+
+Fit and validate on Tamil Nadu only; report per land-cover class
+
+NRT and standard data mixed
+
+Version field kept; cutoff read from the availability endpoint (M1.1, M1.7)
+
+Scope creep
+
+Gates A to C; no interface work before Gate B
+
+Open items to settle early
+
+Land-cover product for M3.5 (candidates: MODIS MCD12Q1, ESA WorldCover); link added when chosen
+
+Cloud-cover source for Tier 2 coverage (decided in M3.6)
+
+Exact NOAA-20 standard-data start date and NOAA-21 standard availability (M1.1, M1.5)

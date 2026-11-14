@@ -1,0 +1,97 @@
+{
+  "audit_version": "v1.0.0",
+  "audit_date": "2026-11-14",
+  "auditor": "Antigravity Scientific Quality & Independent Verification Audit",
+  "milestone": "M5",
+  "gate": "Gate B",
+  "gate_b_final_decision": "CONDITIONAL PASS",
+  "unconditional_release_decision": "FAIL",
+  "is_conditional_acceptance_authorized_by_methodology": true,
+  "methodology_citations": [
+    {
+      "section": "Section 6 (Implementation Plan, Line 727)",
+      "text": "The gates are decision points: A decides whether calibration is worth doing, B decides which harmonised outputs go live, and C decides whether the app is ready to release."
+    },
+    {
+      "section": "Section 8 (Task M5.7 & Gate B Done-When, Line 855)",
+      "text": "Done when: the report is written and Gate B is decided. Harmonised outputs go live in the app only for tests that passed; failed tests are documented and labelled, not hidden."
+    },
+    {
+      "section": "Section 4.4 (Validation Framework, Line 534)",
+      "text": "A failed test is reported, and the affected output stays labelled 'not validated' in the app."
+    }
+  ],
+  "forensic_findings": {
+    "overlap_ratio_1_94x": {
+      "metric": "Median annual predicted/observed VIIRS ratio across 15 overlap years (2012–2026)",
+      "value": 1.937,
+      "raw_modis_ratio": 17.2,
+      "sample_size_cell_weeks": 1132960,
+      "cell_week_pred_mean": 1.0082,
+      "cell_week_obs_mean": 0.2232,
+      "cell_week_bias": 0.7851,
+      "cell_week_mae": 1.1206,
+      "cell_week_median_ae": 0.1121,
+      "cell_week_rmse": 271.4,
+      "cell_week_pearson_r": 0.3436,
+      "assessment": "Order-of-magnitude improvement over raw MODIS 17.2x gap, but represents systematic overprediction on typical years and severe runaway on wildfire years."
+    },
+    "sensor_transitions": {
+      "july_2002_seam": {
+        "verdict": "FAIL",
+        "raw_jump_pct": 79.83,
+        "harm_jump_pct": 118.60,
+        "root_cause": "Pre-2002 Terra-only period lacks diurnal bridge for missing afternoon Aqua pass."
+      },
+      "january_2012_seam": {
+        "verdict": "PASS",
+        "raw_jump_pct": 1373.93,
+        "harm_jump_pct": 24.98,
+        "reduction_achieved": ">98% reduction of cross-sensor resolution step."
+      },
+      "may_2018_noaa20": {
+        "verdict": "PASS (Model) / UNCONSTRAINED (Harmonised Stream)",
+        "raw_jump_pct": 193.02,
+        "harm_jump_pct": 183.33,
+        "note": "Exposure offset built into expected values; harmonised stream inherits raw VIIRS additions."
+      },
+      "march_2023_noaa21": {
+        "verdict": "PASS (Model) / UNCONSTRAINED (Harmonised Stream)",
+        "raw_jump_pct": 54.86,
+        "harm_jump_pct": -26.96,
+        "note": "Exposure offset adjusts to 42 passes/week."
+      }
+    },
+    "spatial_holdout_reconciliation": {
+      "block_4_ghats_test_mae": 7.4888,
+      "block_4_ghats_all_year_mae": 4.8193,
+      "reconciliation": "4.8193 is sample-weighted across all 15 years (2012–2026, N=245,992); 7.489 is evaluated strictly on the 2022–2026 test partition (N=78,616) which experienced severe 2024/2026 wildfires.",
+      "block_3_delta_test_mae": 0.5443,
+      "ecological_composition": {
+        "block_3_delta": "34.4% Shrubland, 33.8% Intensive Paddy, 30.9% Mosaic Dryland, 0.96% Forest",
+        "block_4_ghats": "52.1% Forest & Woodland, 35.6% Mosaic Dryland, 12.3% Shrubland"
+      }
+    },
+    "uncertainty_coverage": {
+      "marginal_80_pct": 94.33,
+      "marginal_95_pct": 96.97,
+      "active_fire_80_pct": 54.64,
+      "active_fire_95_pct": 75.69,
+      "status": "FAIL on active-fire calibration. Must not be claimed as calibrated for active events."
+    }
+  },
+  "authorized_output_streams": [
+    "Post-2012 Observed VIIRS Hotspots (Weekly/Monthly Aggregates, direct satellite observations)",
+    "Post-2012 Overlap Daily Disaggregated Estimates (with disaggregation label)",
+    "2002–2011 Dual-MODIS Historical Estimates for typical weeks M <= 5 (with predicted tag)"
+  ],
+  "blocked_or_restricted_output_streams": [
+    "Pre-July 2002 Terra-only estimates (BLOCKED / NOT VALIDATED)",
+    "Forest mega-fire cell-weeks M > 10 (FLAGGED AS EXTRAPOLATION OUTLIER)",
+    "Western Ghats unconstrained predictions (FLAGGED AS CONDITIONAL)",
+    "Active-fire uncertainty intervals (FLAGGED AS UNDER-COVERED)"
+  ],
+  "next_milestone_authorization": {
+    "m6_analysis_engine": "APPROVED"
+  }
+}

@@ -1,0 +1,4 @@
+model_step,split,n_months,count_mae,count_rmse,count_r2,count_pearson_r,frp_mae,frp_rmse,frp_r2,frp_pearson_r
+Step_A_Robust_Baseline,train,84,190.08,311.91,0.852,0.927,1101.91,1876.37,0.846,0.925
+Step_A_Robust_Baseline,validation,36,804.2,1394.02,0.518,0.957,4677.52,8967.39,0.605,0.956
+Step_A_Robust_Baseline,test,56,1463.92,2441.96,0.337,0.837,9076.39,17657.22,0.334,0.904

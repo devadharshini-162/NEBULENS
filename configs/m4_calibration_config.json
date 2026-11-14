@@ -1,0 +1,145 @@
+{
+  "config_version": "v1.0.0-frozen",
+  "created_at": "2026-11-14T20:00:00Z",
+  "author": "Antigravity Data Science & Remote Sensing Pipeline",
+  "study_region": {
+    "name": "Tamil Nadu, India",
+    "district_count": 38,
+    "area_km2": 129914,
+    "crs": "EPSG:6933"
+  },
+  "random_seed": 42,
+  "modeling_resolution": {
+    "primary_spatial_km": 10,
+    "primary_temporal": "weekly",
+    "spatial_grid_cells": 1460,
+    "temporal_unit": "ISO calendar week (W-MON)"
+  },
+  "temporal_splits": {
+    "pre_overlap_historical": {
+      "start": "2000-11-01",
+      "end": "2012-01-19",
+      "purpose": "Historical MODIS-only baseline; sensor transition test at Jan 2012 seam"
+    },
+    "train": {
+      "start": "2012-01-20",
+      "end": "2018-12-31",
+      "days": 2538,
+      "weeks": 363,
+      "years": [2012, 2013, 2014, 2015, 2016, 2017, 2018],
+      "purpose": "Model fitting and parameter estimation"
+    },
+    "validation": {
+      "start": "2019-01-01",
+      "end": "2021-12-31",
+      "days": 1096,
+      "weeks": 156,
+      "years": [2019, 2020, 2021],
+      "purpose": "Hyperparameter selection, dispersion calibration, zero-frequency hurdle check"
+    },
+    "test": {
+      "start": "2022-01-01",
+      "end": "2026-08-31",
+      "days": 1704,
+      "weeks": 244,
+      "years": [2022, 2023, 2024, 2025, 2026],
+      "purpose": "Strictly held-out out-of-sample final evaluation and generalisation test"
+    }
+  },
+  "spatial_blocks": {
+    "crs": "EPSG:6933",
+    "blocks": {
+      "Block_1_NorthEast": {
+        "description": "Northern coastal and plain districts (Chennai, Thiruvallur, Kancheepuram, Chengalpattu, Viluppuram)",
+        "condition": "y >= 1450000 and x >= 7550000",
+        "expected_cells": 403
+      },
+      "Block_2_NorthWest": {
+        "description": "Northwestern plateau and inland dry belt (Dharmapuri, Krishnagiri, Salem, Vellore, Tirupathur)",
+        "condition": "y >= 1450000 and x < 7550000",
+        "expected_cells": 177
+      },
+      "Block_3_CentralEast_Delta": {
+        "description": "Cauvery agricultural delta and central plain (Thanjavur, Tiruvarur, Nagapattinam, Mayiladuthurai, Cuddalore)",
+        "condition": "1220000 <= y < 1450000 and x >= 7550000",
+        "expected_cells": 314
+      },
+      "Block_4_CentralWest": {
+        "description": "Western Ghats montane forests and foothills (The Nilgiris, Coimbatore, Erode, Tiruppur, Dindigul)",
+        "condition": "1220000 <= y < 1450000 and x < 7550000",
+        "expected_cells": 317
+      },
+      "Block_5_South": {
+        "description": "Southern semi-arid plains and littoral (Madurai, Sivaganga, Virudhunagar, Ramanathapuram, Thoothukkudi, Tirunelveli, Tenkasi, Kanniyakumari)",
+        "condition": "y < 1220000",
+        "expected_cells": 249
+      }
+    },
+    "holdout_blocks": ["Block_3_CentralEast_Delta", "Block_4_CentralWest"]
+  },
+  "model_ladder": {
+    "step_A": {
+      "name": "Robust Linear Baseline",
+      "model_type": "Theil-Sen / Huber robust regression",
+      "unit": "Monthly regional totals",
+      "role": "Interpretable linear benchmark"
+    },
+    "step_B": {
+      "name": "Negative Binomial GLM",
+      "model_type": "Log-link Negative Binomial GLM with exposure offset and land-cover interactions",
+      "unit": "10 km cell-weeks",
+      "role": "Primary count calibration model"
+    },
+    "step_C": {
+      "name": "Hurdle Negative Binomial",
+      "model_type": "Two-part Hurdle (Logit zero gate + Truncated Negative Binomial)",
+      "unit": "10 km cell-weeks",
+      "role": "Contingent zero-inflation model"
+    },
+    "step_D": {
+      "name": "Gradient Boosting Regressor",
+      "model_type": "HistGradientBoostingRegressor / XGBoost with Poisson loss",
+      "unit": "10 km cell-weeks",
+      "role": "Non-linear machine learning alternative"
+    }
+  },
+  "frp_models": {
+    "model_A_pair": {
+      "name": "Aqua-VIIRS Pairwise FRP Bias Model",
+      "dataset": "m3_4_aqua_viirs_pairs.parquet",
+      "n_baseline_pairs": 1809,
+      "features": ["scan_aqua", "distance_m", "landcover_class"],
+      "target": "log(frp_viirs / frp_aqua)"
+    },
+    "model_B_cell": {
+      "name": "Cell-Week Total FRP Model",
+      "model_type": "Two-part Log-Linear / Gamma model conditional on positive fire count",
+      "target": "frp_sum_viirs"
+    }
+  },
+  "promotion_rules": {
+    "simplicity_rule": "Prefer simpler interpretable model (GLM) unless a complex model exceeds improvement threshold on held-out data without degrading sensor transition",
+    "hurdle_zero_misfit_threshold_pct": 2.0,
+    "hurdle_min_mae_improvement_pct": 3.0,
+    "gradient_boosting_min_mae_improvement_pct": 5.0,
+    "sensor_transition_max_jump_increase_pct": 0.0
+  },
+  "bootstrap_uncertainty": {
+    "method": "Block bootstrap over years",
+    "n_replicates": 100,
+    "confidence_levels": [0.80, 0.95],
+    "random_seed": 42
+  },
+  "required_output_fields": [
+    "observed_modis",
+    "observed_viirs",
+    "expected_sensor_specific_value",
+    "harmonised_estimate",
+    "uncertainty"
+  ],
+  "downscaling_rules": {
+    "method": "Overpass-weighted temporal allocation",
+    "fallback": "Uniform 1/7 allocation only when zero overpass evidence exists across entire week",
+    "constraint": "Daily values must reconcile exactly to weekly total (sum_d V_{c,d} == V_{c,w})"
+  }
+}

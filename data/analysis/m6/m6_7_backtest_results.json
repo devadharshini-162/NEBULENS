@@ -1,0 +1,38 @@
+[
+  {
+    "transition_id": "T1_JAN_2012",
+    "description": "MODIS (1 km) to VIIRS Suomi-NPP (375 m) sensor transition",
+    "transition_date": "2012-01-20",
+    "raw_count_jump_pct": 1352.0987654320988,
+    "raw_z_score": 246.23372480491622,
+    "attribution_outcome": "likely_sensor_related_change",
+    "confidence": "medium",
+    "explanation": "Fire detections rose (z=246.23), but observation coverage expanded (1.0x) while FRP intensity remained stable (FRP ratio=0.5384615384615384), supporting an observation/sensor-driven effect.",
+    "avoids_false_fire_growth_claim": true,
+    "identified_sensor_effect": true
+  },
+  {
+    "transition_id": "T2_MAY_2018",
+    "description": "NOAA-20 VIIRS operational addition (exposure 14 to 28 passes/week)",
+    "transition_date": "2018-05-01",
+    "raw_count_jump_pct": 234.62666666666667,
+    "raw_z_score": 39.56332044733483,
+    "attribution_outcome": "likely_sensor_related_change",
+    "confidence": "high",
+    "explanation": "Fire detections rose (z=39.56), but observation coverage expanded (2.0x) while FRP intensity remained stable (FRP ratio=1.0555555555555556), supporting an observation/sensor-driven effect.",
+    "avoids_false_fire_growth_claim": true,
+    "identified_sensor_effect": true
+  },
+  {
+    "transition_id": "T3_MAR_2023",
+    "description": "NOAA-21 VIIRS operational addition (exposure 28 to 42 passes/week)",
+    "transition_date": "2023-03-01",
+    "raw_count_jump_pct": 163.02,
+    "raw_z_score": 10.026320888477073,
+    "attribution_outcome": "likely_sensor_related_change",
+    "confidence": "medium",
+    "explanation": "Fire detections rose (z=10.03), but observation coverage expanded (1.5x) while FRP intensity remained stable (FRP ratio=0.972972972972973), supporting an observation/sensor-driven effect.",
+    "avoids_false_fire_growth_claim": true,
+    "identified_sensor_effect": true
+  }
+]

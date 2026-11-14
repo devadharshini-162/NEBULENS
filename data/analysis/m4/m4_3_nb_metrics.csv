@@ -1,0 +1,11 @@
+evaluation_subset,n_records,mae,rmse,r2,pearson_r,actual_zero_pct,predicted_zero_pct,zero_misfit_pct,mae_active_fires_only
+Temporal_Train (2012-2018),537280,0.3217,49.5816,-4268.4913,0.1673,93.85,91.35,2.5,3.6499
+Temporal_Validation (2019-2021),233600,1.536,439.3098,-81322.0628,0.2872,90.85,85.97,4.88,14.9497
+Temporal_Test (2022-2026 Held-Out),362080,2.038,319.8805,-19083.3044,0.4388,87.56,81.65,5.91,14.2752
+Spatial_Holdout_CauveryDelta,128112,0.4334,2.6435,-1.5375,0.3708,89.71,83.72,5.99,2.2064
+Spatial_Holdout_WesternGhats,129336,4.9757,710.6168,-77029.7695,0.469,90.19,85.42,4.77,48.751
+Validation_LC_Forest & Woodland,47840,5.8424,970.5894,-208761.7934,0.4539,94.07,89.83,4.24,96.4428
+Validation_LC_Cropland & Mosaic,100960,0.433,12.4233,-71.4894,0.3254,90.99,86.05,4.94,3.0344
+Validation_LC_Shrubland & Savanna,45920,0.3896,1.8495,-2.0196,0.2058,89.62,84.4,5.22,1.8474
+Validation_LC_Cropland,22080,0.3307,1.1663,0.0593,0.2516,90.48,88.22,2.27,2.1041
+Validation_LC_Urban / Developed Corridor,16800,0.6192,1.5852,-0.0803,0.2475,84.65,75.86,8.79,2.0189

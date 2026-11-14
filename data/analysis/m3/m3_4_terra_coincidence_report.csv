@@ -1,0 +1,2 @@
+comparison,common_dates_count,minimum_time_difference_seconds,minimum_time_difference_hours,verdict
+Terra vs VIIRS (Daytime Overpass Gap),1434,3600.0,1.0,NO COINCIDENT PASSES. Terra morning orbit (~10:30 LT) and VIIRS afternoon orbit (~13:30 LT) are separated by >= 2.5 to 3.0 hours. True simultaneous physical fire pairing is physically impossible.

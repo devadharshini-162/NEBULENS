@@ -1,0 +1,15 @@
+services:
+  nebulens:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: nebulens:latest
+    container_name: nebulens-platform
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - PYTHONUNBUFFERED=1
+    restart: unless-stopped
+    volumes:
+      - ./data:/app/data:ro

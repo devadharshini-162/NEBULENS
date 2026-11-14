@@ -1,0 +1,22 @@
+{
+  "milestone": "M5",
+  "gate": "Gate B (Model Validation & Go-Live Authorization)",
+  "decision": "CONDITIONAL PASS",
+  "decision_date": "2026-11-14",
+  "author": "Antigravity Remote Sensing & Scientific Validation Engine",
+  "core_question": "Are the harmonised data more comparable than the raw MODIS and VIIRS data?",
+  "core_finding": "YES for the genuine sensor overlap era (2012\u20132026) and typical fire regimes (M <= 5), where harmonisation reduces the artificial Jan 2012 seam jump from +1,373.9% to +25.0% and maintains high seasonal correlation (r = 0.933) and peak-month preservation. HOWEVER, Gate B is awarded as a CONDITIONAL PASS because three structural limitations failed: (1) The pre-2002 Terra-only era lacks a diurnal bridge; (2) Extreme forest cell-weeks (M > 10) trigger unconstrained power-law extrapolation; (3) Active-fire uncertainty intervals achieve only 54.64% empirical coverage at nominal 80%.",
+  "app_authorization": {
+    "authorized_for_release": [
+      "Post-2012 overlap harmonised counts and FRP (weekly and monthly)",
+      "2002\u20132011 dual-MODIS typical fire weeks (with prediction tag)"
+    ],
+    "restricted_or_flagged": [
+      "Pre-July 2002 Terra-only era (labelled NOT VALIDATED)",
+      "Forest cell-weeks with M > 10 (labelled EXTRAPOLATION OUTLIER)",
+      "Active-fire uncertainty intervals (must display undercoverage warning)",
+      "Daily estimates (must display disaggregated weekly estimate tag)"
+    ]
+  },
+  "next_milestone_readiness": "APPROVED FOR MILESTONE M6 (Analysis Engine & Anomaly Detection)"
+}

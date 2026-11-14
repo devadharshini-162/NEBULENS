@@ -1,0 +1,27 @@
+{
+  "selected_model": "Step_B_Negative_Binomial_GLM",
+  "selected_model_step": "Step_B",
+  "rationale": "Gradient Boosting failed to consistently beat Negative Binomial GLM by >= 5.0% across all spatial holdouts. In accordance with the simplicity rule, Step B (Negative Binomial GLM) is promoted.",
+  "comparisons": {
+    "validation_mae": {
+      "nb_glm": 1.536,
+      "gbm": 8.2995,
+      "improvement_pct": -440.33203125
+    },
+    "test_mae": {
+      "nb_glm": 2.038,
+      "gbm": 13.9588,
+      "improvement_pct": -584.9263984298332
+    },
+    "spatial_delta_mae": {
+      "nb_glm": 0.4334,
+      "gbm": 4.5803,
+      "improvement_pct": -956.8297185048455
+    },
+    "spatial_ghats_mae": {
+      "nb_glm": 4.9757,
+      "gbm": 16.5682,
+      "improvement_pct": -232.9822939485902
+    }
+  }
+}

@@ -1,0 +1,5 @@
+subset,n_records,cov_80_nominal,cov_80_actual,cov_95_nominal,cov_95_actual
+All Cell-Weeks (Test),362080,80.0,94.33,95.0,96.97
+Zero-Fire (Test),317043,80.0,99.97,95.0,100.0
+Active-Fire (V > 0),45037,80.0,54.64,95.0,75.69
+High-Fire (V >= 5),6227,80.0,14.73,95.0,22.07

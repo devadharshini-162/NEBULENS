@@ -1,0 +1,4 @@
+model_step,evaluation_subset,n_records,mae,rmse,r2,pearson_r,actual_zero_pct,predicted_zero_pct,zero_misfit_pct
+Step_C_Hurdle_Negative_Binomial,Temporal_Train (2012-2018),537280,0.1991,0.6594,0.2448,0.4961,93.85,93.85,0.0
+Step_C_Hurdle_Negative_Binomial,Temporal_Validation (2019-2021),233600,0.3695,1.2364,0.3558,0.6039,90.85,93.26,2.41
+Step_C_Hurdle_Negative_Binomial,Temporal_Test (2022-2026 Held-Out),362080,0.5638,1.8092,0.3895,0.6357,87.56,92.53,4.97

@@ -1,0 +1,7 @@
+model,split,n_pairs,log_ratio_mae,log_ratio_rmse,log_ratio_r,frp_mae_mw,median_frp_ratio_obs,median_frp_ratio_pred,n_active_weeks,frp_rmse_mw,frp_r2,frp_pearson_r
+Model_A_Pairwise_FRP,Train,519.0,0.5225,0.6663,0.4808,6.09,0.436,0.458,,,,
+Model_A_Pairwise_FRP,Validation,575.0,0.5678,0.7377,0.4786,9.46,0.455,0.446,,,,
+Model_A_Pairwise_FRP,Test,715.0,0.5046,0.6616,0.4543,7.1,0.47,0.451,,,,
+Model_B_Cell_Total_FRP,Train,,,,,27.31,,,2251.0,72.05,0.2611,0.6112
+Model_B_Cell_Total_FRP,Validation,,,,,66.4,,,1232.0,334.88,0.1913,0.8715
+Model_B_Cell_Total_FRP,Test,,,,,83.99,,,2482.0,265.15,0.1173,0.7464

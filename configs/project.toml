@@ -1,0 +1,36 @@
+# ============================================================
+# NEBULENS — project configuration
+# ============================================================
+
+[project]
+name = "nebulens"
+version = "0.1.0-m0"
+description = "MODIS-VIIRS active-fire harmonisation for Tamil Nadu"
+
+[study_region]
+state_name = "Tamil Nadu"
+country_iso = "IND"
+# CRS for administrative boundary storage and display
+boundary_crs = "EPSG:4326"
+
+[grid]
+# Locked decision: 10 km equal-area grid in EPSG:6933
+analytical_crs = "EPSG:6933"
+resolution_km = 10
+sensitivity_checks_km = [5, 25]
+
+[time]
+# Locked decision: IST calendar day
+timezone = "Asia/Kolkata"
+utc_offset_hours = 5.5
+
+[data]
+# MODIS and VIIRS product identifiers (for future downloader milestone)
+modis_product = "MODIS_C61_Global"
+viirs_product = "VIIRS_SNPP_NRT"
+
+[paths]
+raw_data = "data/raw"
+parquet_data = "data/parquet"
+boundaries = "data/boundaries"
+figures = "docs/figures"

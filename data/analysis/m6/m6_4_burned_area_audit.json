@@ -1,0 +1,25 @@
+{
+  "product": "MCD64A1",
+  "collection": "061",
+  "spatial_resolution_m": 500,
+  "temporal_resolution": "monthly",
+  "projection": "+proj=sinu +lon_0=0 +x_0=0 +y_0=0 +a=6371007.181 +b=6371007.181 +units=m +no_defs",
+  "required_tiles": [
+    "h25v07",
+    "h25v08",
+    "h26v07",
+    "h26v08"
+  ],
+  "tile_coverage_description": {
+    "h25v07": "Western Ghats, Nilgiris, Coimbatore, Salem, Dharmapuri (NW TN)",
+    "h25v08": "Tirunelveli, Kanyakumari, Tenkasi, Madurai, Dindigul (SW/S TN)",
+    "h26v07": "Chennai, Tiruvallur, Chengalpattu, Cuddalore, Cauvery Delta (NE TN)",
+    "h26v08": "Ramanathapuram coastal edge, Gulf of Mannar (SE TN)"
+  },
+  "cmr_endpoint": "https://cmr.earthdata.nasa.gov/search/granules.json?short_name=MCD64A1&version=061",
+  "laads_archive_url": "https://ladsweb.modaps.eosdis.nasa.gov/archive/allData/61/MCD64A1/",
+  "auth_requirement": "Earthdata OAuth2 / URS credentials required for binary HDF download",
+  "status": "access_points_verified_download_blocked_by_earthdata_oauth",
+  "pixel_area_conversion_km2": 0.2146586,
+  "audit_timestamp_utc": "2026-11-14T17:56:25.668006+00:00"
+}

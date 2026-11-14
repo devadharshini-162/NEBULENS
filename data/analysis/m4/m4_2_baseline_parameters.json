@@ -1,0 +1,14 @@
+{
+  "model_step": "Step_A_Robust_Baseline",
+  "algorithm": "HuberRegressor(epsilon=1.35)",
+  "count_model": {
+    "slope": 8.838116935068731,
+    "intercept": 58.601051206916416,
+    "scale": 95.59839890302825
+  },
+  "frp_model": {
+    "slope": 1.7790911750753124,
+    "intercept": 557.7331833623504,
+    "scale": 555.620996793658
+  }
+}

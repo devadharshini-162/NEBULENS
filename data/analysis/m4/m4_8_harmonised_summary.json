@@ -1,0 +1,243 @@
+{
+  "dataset_name": "harmonised_daily",
+  "description": "Harmonised daily active fire dataset for Tamil Nadu (2000\u20132026)",
+  "spatial_resolution": "10 km EPSG:6933",
+  "n_grid_cells": 1460,
+  "temporal_range": "2000-01-01 to 2026-12-31",
+  "total_cell_days": 13775100,
+  "model_version": "m4_step_b_nb_glm_v1.0.0",
+  "count_model": "Negative Binomial GLM (Step B) with exposure offset and landcover interactions",
+  "frp_model": "Huber Robust Log-Linear (Model B)",
+  "uncertainty_method": "Year-Block Bootstrap (B=100 replicates, 80% and 95% intervals)",
+  "downscaling_method": "Overpass-weighted daily allocation (strictly conserving weekly totals)",
+  "required_fields_status": {
+    "observed_modis": "Present (modis_count_observed, modis_frp_observed)",
+    "observed_viirs": "Present (viirs_count_observed, viirs_frp_observed)",
+    "expected_sensor_specific_value": "Present (expected_viirs_count, expected_viirs_frp)",
+    "harmonised_estimate": "Present (harmonised_count, harmonised_frp)",
+    "uncertainty": "Present (80% and 95% lower/upper bounds for count and FRP)"
+  },
+  "totals": {
+    "modis_detections": 23453,
+    "viirs_detections": 252855,
+    "harmonised_detections": 627678.0
+  },
+  "yearly_breakdown": [
+    {
+      "year": 2000,
+      "records": 89060,
+      "modis_detections": 10,
+      "viirs_detections": 0,
+      "harmonised_detections": 165.5,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2001,
+      "records": 532900,
+      "modis_detections": 300,
+      "viirs_detections": 0,
+      "harmonised_detections": 3798.8,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2002,
+      "records": 532900,
+      "modis_detections": 450,
+      "viirs_detections": 0,
+      "harmonised_detections": 5800.6,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2003,
+      "records": 532900,
+      "modis_detections": 614,
+      "viirs_detections": 0,
+      "harmonised_detections": 10015.2,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2004,
+      "records": 534360,
+      "modis_detections": 1022,
+      "viirs_detections": 0,
+      "harmonised_detections": 26224.7,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2005,
+      "records": 532900,
+      "modis_detections": 727,
+      "viirs_detections": 0,
+      "harmonised_detections": 9586.2,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2006,
+      "records": 532900,
+      "modis_detections": 645,
+      "viirs_detections": 0,
+      "harmonised_detections": 8498.6,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2007,
+      "records": 532900,
+      "modis_detections": 996,
+      "viirs_detections": 0,
+      "harmonised_detections": 35941.4,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2008,
+      "records": 534360,
+      "modis_detections": 665,
+      "viirs_detections": 0,
+      "harmonised_detections": 8506.6,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2009,
+      "records": 532900,
+      "modis_detections": 1213,
+      "viirs_detections": 0,
+      "harmonised_detections": 244081.6,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2010,
+      "records": 532900,
+      "modis_detections": 589,
+      "viirs_detections": 0,
+      "harmonised_detections": 11718.8,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2011,
+      "records": 532900,
+      "modis_detections": 798,
+      "viirs_detections": 0,
+      "harmonised_detections": 9888.2,
+      "h_source": "calibrated_from_modis"
+    },
+    {
+      "year": 2012,
+      "records": 534360,
+      "modis_detections": 1247,
+      "viirs_detections": 11762,
+      "harmonised_detections": 12358.8,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2013,
+      "records": 532900,
+      "modis_detections": 679,
+      "viirs_detections": 7349,
+      "harmonised_detections": 7349.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2014,
+      "records": 532900,
+      "modis_detections": 959,
+      "viirs_detections": 9859,
+      "harmonised_detections": 9859.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2015,
+      "records": 532900,
+      "modis_detections": 653,
+      "viirs_detections": 6460,
+      "harmonised_detections": 6460.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2016,
+      "records": 534360,
+      "modis_detections": 982,
+      "viirs_detections": 11008,
+      "harmonised_detections": 11008.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2017,
+      "records": 532900,
+      "modis_detections": 783,
+      "viirs_detections": 7142,
+      "harmonised_detections": 7142.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2018,
+      "records": 532900,
+      "modis_detections": 784,
+      "viirs_detections": 10387,
+      "harmonised_detections": 10387.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2019,
+      "records": 532900,
+      "modis_detections": 1390,
+      "viirs_detections": 25097,
+      "harmonised_detections": 25097.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2020,
+      "records": 534360,
+      "modis_detections": 780,
+      "viirs_detections": 17188,
+      "harmonised_detections": 17188.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2021,
+      "records": 532900,
+      "modis_detections": 747,
+      "viirs_detections": 12862,
+      "harmonised_detections": 12862.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2022,
+      "records": 532900,
+      "modis_detections": 758,
+      "viirs_detections": 13355,
+      "harmonised_detections": 13355.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2023,
+      "records": 532900,
+      "modis_detections": 1187,
+      "viirs_detections": 27291,
+      "harmonised_detections": 27291.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2024,
+      "records": 534360,
+      "modis_detections": 1511,
+      "viirs_detections": 39453,
+      "harmonised_detections": 39453.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2025,
+      "records": 532900,
+      "modis_detections": 1315,
+      "viirs_detections": 24210,
+      "harmonised_detections": 24210.0,
+      "h_source": "observed_viirs"
+    },
+    {
+      "year": 2026,
+      "records": 354780,
+      "modis_detections": 1649,
+      "viirs_detections": 29432,
+      "harmonised_detections": 29432.0,
+      "h_source": "observed_viirs"
+    }
+  ]
+}

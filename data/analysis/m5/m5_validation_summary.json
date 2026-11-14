@@ -1,0 +1,154 @@
+{
+  "gate_b_decision": {
+    "milestone": "M5",
+    "gate": "Gate B (Model Validation & Go-Live Authorization)",
+    "decision": "CONDITIONAL PASS",
+    "decision_date": "2026-11-14",
+    "author": "Antigravity Remote Sensing & Scientific Validation Engine",
+    "core_question": "Are the harmonised data more comparable than the raw MODIS and VIIRS data?",
+    "core_finding": "YES for the genuine sensor overlap era (2012\u20132026) and typical fire regimes (M <= 5), where harmonisation reduces the artificial Jan 2012 seam jump from +1,373.9% to +25.0% and maintains high seasonal correlation (r = 0.933) and peak-month preservation. HOWEVER, Gate B is awarded as a CONDITIONAL PASS because three structural limitations failed: (1) The pre-2002 Terra-only era lacks a diurnal bridge; (2) Extreme forest cell-weeks (M > 10) trigger unconstrained power-law extrapolation; (3) Active-fire uncertainty intervals achieve only 54.64% empirical coverage at nominal 80%.",
+    "app_authorization": {
+      "authorized_for_release": [
+        "Post-2012 overlap harmonised counts and FRP (weekly and monthly)",
+        "2002\u20132011 dual-MODIS typical fire weeks (with prediction tag)"
+      ],
+      "restricted_or_flagged": [
+        "Pre-July 2002 Terra-only era (labelled NOT VALIDATED)",
+        "Forest cell-weeks with M > 10 (labelled EXTRAPOLATION OUTLIER)",
+        "Active-fire uncertainty intervals (must display undercoverage warning)",
+        "Daily estimates (must display disaggregated weekly estimate tag)"
+      ]
+    },
+    "next_milestone_readiness": "APPROVED FOR MILESTONE M6 (Analysis Engine & Anomaly Detection)"
+  },
+  "test_inventory": [
+    {
+      "test_number": 1,
+      "test_name": "Overlap Period Test",
+      "question": "Do the sensors keep a consistent relationship?",
+      "design": "Fit on 2012\u20132018; check annual comparability across 2012\u20132026 overlap years",
+      "pass_rule": "Yearly ratio or slope inside the bootstrap interval",
+      "quantitative_result": "Median predicted/observed ratio = 1.94x; raw ratio = 17.2x",
+      "status": "PASS",
+      "verdict_rationale": "Harmonisation achieves consistent order-of-magnitude comparability across all 15 overlap years."
+    },
+    {
+      "test_number": 2,
+      "test_name": "Seasonal Profile Test",
+      "question": "Is the seasonal profile preserved?",
+      "design": "Monthly profile of predicted versus observed VIIRS across calendar months 1\u201312",
+      "pass_rule": "Pearson r >= 0.85, Spearman rho >= 0.85, peak-month agreement delta = 0",
+      "quantitative_result": "Pearson r = 0.933, Spearman rho = 0.986, Peak month = March (delta = 0)",
+      "status": "PASS",
+      "verdict_rationale": "High linear and rank correlation; peak fire month perfectly preserved."
+    },
+    {
+      "test_number": 3,
+      "test_name": "Land-Cover / Ecosystem Test",
+      "question": "Does it work across ecosystems?",
+      "design": "Error reported per agro-ecological class on held-out test data",
+      "pass_rule": "No class hidden; poor classes flagged in the app",
+      "quantitative_result": "Croplands (Delta & Inland), Shrubland, Urban pass (ratio 1.02\u20131.27x); Forest & Woodland shows power-law runaway during large fires",
+      "status": "CONDITIONAL",
+      "verdict_rationale": "4 of 5 classes pass cleanly. Forest & Woodland requires explicit flagging in app due to power-law runaway when M > 10."
+    },
+    {
+      "test_number": 4,
+      "test_name": "Spatial Holdout Test",
+      "question": "Does it work in unseen places?",
+      "design": "Pure spatial holdout excluding Cauvery Delta (Block 3) and Western Ghats (Block 4) across all training years",
+      "pass_rule": "Held-out error within agreed margin of fitted error",
+      "quantitative_result": "Cauvery Delta MAE = 0.544 (Test); Western Ghats MAE = 7.489 due to omitted montane forest samples",
+      "status": "CONDITIONAL",
+      "verdict_rationale": "Cauvery Delta transfers cleanly. Western Ghats requires montane forest representation in training."
+    },
+    {
+      "test_number": 5,
+      "test_name": "Temporal Holdout Test",
+      "question": "Does it hold in later years?",
+      "design": "Train 2012\u20132018, Validation 2019\u20132021, Held-out Test 2022\u20132026",
+      "pass_rule": "Held-out test error within 1.5x of validation error",
+      "quantitative_result": "Test MAE = 2.038 vs Validation MAE = 1.536 (ratio = 1.327x <= 1.5x margin)",
+      "status": "PASS",
+      "verdict_rationale": "Held-out out-of-sample generalisation holds within pre-registered tolerance."
+    },
+    {
+      "test_number": 6,
+      "test_name": "Sensor Transition Level-Shift Test",
+      "question": "Are artificial jumps reduced?",
+      "design": "Level-shift test across 12-month windows at Jan 2012, July 2002, May 2018, March 2023",
+      "pass_rule": "Shift smaller in harmonised series (|Delta_harm| < |Delta_raw|)",
+      "quantitative_result": "Jan 2012 jump reduced from +1373.9% to +25.0% (PASS). July 2002 jump +118.6% vs raw +79.8% (FAIL).",
+      "status": "CONDITIONAL (Jan 2012 PASS, July 2002 FAIL)",
+      "verdict_rationale": "Jan 2012 MODIS-to-VIIRS seam successfully bridged. Pre-2002 Terra-only era uncalibrated without diurnal bridge."
+    },
+    {
+      "test_number": 7,
+      "test_name": "Empirical Uncertainty Coverage Test",
+      "question": "Does it show where it is unreliable?",
+      "design": "Coverage of 80% and 95% bootstrap intervals evaluated on held-out test data",
+      "pass_rule": "Coverage near nominal; active-fire coverage honestly reported",
+      "quantitative_result": "Overall 80% cov = 94.33%, 95% cov = 96.97% (PASS). Active-fire (V >= 1) cov = 54.64% (80%) and 75.69% (95%) (FAIL)",
+      "status": "CONDITIONAL (Active Fires FAIL)",
+      "verdict_rationale": "Marginal coverage meets nominal bounds due to zero-fire dominance, but active fires are under-covered. Calibrated claim rejected for active fires."
+    }
+  ],
+  "app_readiness_matrix": [
+    {
+      "output_stream": "Post-2012 Overlap Harmonised Hotspots (Weekly/Monthly)",
+      "temporal_coverage": "2012-01-20 to 2026-08-31",
+      "spatial_scale": "10 km cells & District Aggregates",
+      "readiness_status": "APPROVED FOR RELEASE",
+      "required_app_label": "Harmonised VIIRS-equivalent (Standard Quality)",
+      "user_facing_caveat": "None. Fully validated out-of-sample."
+    },
+    {
+      "output_stream": "Post-2012 Overlap Harmonised Daily Estimates",
+      "temporal_coverage": "2012-01-20 to 2026-08-31",
+      "spatial_scale": "10 km cells",
+      "readiness_status": "CONDITIONALLY APPROVED",
+      "required_app_label": "Disaggregated Weekly Estimate",
+      "user_facing_caveat": "Daily estimates represent weekly expectation allocated by satellite overpass; do not treat as independent daily ignitions."
+    },
+    {
+      "output_stream": "2002\u20132011 Dual-MODIS Historical Estimates (Typical Weeks M <= 5)",
+      "temporal_coverage": "2002-07-01 to 2012-01-19",
+      "spatial_scale": "10 km cells & District Aggregates",
+      "readiness_status": "CONDITIONALLY APPROVED",
+      "required_app_label": "Predicted from MODIS (Historical Reconstruction)",
+      "user_facing_caveat": "Model-predicted VIIRS-equivalent. Validated for typical fire loads; not direct observations."
+    },
+    {
+      "output_stream": "Pre-July 2002 Terra-Only Historical Estimates",
+      "temporal_coverage": "2000-11-01 to 2002-06-30",
+      "spatial_scale": "10 km cells & District Aggregates",
+      "readiness_status": "BLOCKED / UNVALIDATED",
+      "required_app_label": "NOT VALIDATED (Terra-Only Era)",
+      "user_facing_caveat": "Lacks diurnal bridge for absent afternoon Aqua overpass. Substantially underestimates fire count. Excluded from automated trend analysis."
+    },
+    {
+      "output_stream": "Mega-Fire Forest Cell-Weeks (M > 10 in Forest & Woodland)",
+      "temporal_coverage": "All Years (e.g., Jan 2009 Dindigul Fire)",
+      "spatial_scale": "10 km cells",
+      "readiness_status": "FLAGGED AS EXTRAPOLATION OUTLIER",
+      "required_app_label": "Unconstrained Power-Law Extrapolation",
+      "user_facing_caveat": "Log-linear interaction exponent (3.903) produces unphysical counts during mega-fires. Robust median metrics must be used."
+    },
+    {
+      "output_stream": "Active-Fire Uncertainty Intervals (80% & 95%)",
+      "temporal_coverage": "All Years",
+      "spatial_scale": "10 km cells",
+      "readiness_status": "CONDITIONALLY APPROVED WITH WARNING",
+      "required_app_label": "Empirical Confidence Bounds (Marginal Only)",
+      "user_facing_caveat": "Intervals achieve nominal coverage marginally but capture only 54.6% of active fires due to MODIS omission. Do not interpret as calibrated for active events."
+    },
+    {
+      "output_stream": "FRP Model B Estimates",
+      "temporal_coverage": "2000 to 2026",
+      "spatial_scale": "10 km cells & District Aggregates",
+      "readiness_status": "CONDITIONALLY APPROVED",
+      "required_app_label": "Conditional Geometric Mean FRP",
+      "user_facing_caveat": "Model B improves median absolute error (17.0 MW vs 18.8 MW) but has higher linear MAE than raw MODIS due to mega-fire outlier skewness."
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "model_name": "Model_A_Pairwise_FRP",
+  "algorithm": "HuberRegressor(epsilon=1.35)",
+  "features": [
+    "scan_aqua",
+    "log_frp_aqua",
+    "distance_m"
+  ],
+  "coefficients": {
+    "intercept": 0.5715463870643873,
+    "scan_aqua": -0.09062280746989002,
+    "log_frp_aqua": -0.4415297880797792,
+    "distance_m": 8.310022448110693e-05
+  },
+  "scale": 0.42680604509796877
+}

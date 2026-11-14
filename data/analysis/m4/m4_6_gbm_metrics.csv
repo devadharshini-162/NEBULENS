@@ -1,0 +1,6 @@
+model_step,evaluation_subset,n_records,count_mae,count_rmse,count_pearson_r,frp_mae,frp_rmse,frp_pearson_r
+Step_D_Gradient_Boosting,Temporal_Train (2012-2018),537280,6.7249,503.5429,0.3345,0.6593,6.2187,0.4935
+Step_D_Gradient_Boosting,Temporal_Validation (2019-2021),233600,8.2995,557.3803,0.389,1.3579,27.6151,0.444
+Step_D_Gradient_Boosting,Temporal_Test (2022-2026 Held-Out),362080,13.9588,725.1981,0.4037,2.1217,25.3296,0.4956
+Step_D_Gradient_Boosting,Spatial_Holdout_CauveryDelta,128112,4.5803,406.4772,0.2645,1.4278,13.5962,0.4906
+Step_D_Gradient_Boosting,Spatial_Holdout_WesternGhats,129336,16.5682,793.9796,0.5444,1.7961,45.0676,0.4471

@@ -1,0 +1,13 @@
+period,grid_resolution,grid_cell_count,temporal_resolution,total_time_units,total_cell_periods,active_cell_periods_combined,zero_detection_fraction_pct,active_modis_cell_periods,zero_pct_modis,active_viirs_cell_periods,zero_pct_viirs
+Full Study Period (2000–2026),5 km (Nested Grid),5547,Daily,9435,52335945,165083,99.68,18363,99.96,151293,99.71
+Full Study Period (2000–2026),5 km (Nested Grid),5547,Weekly,1348,7477356,136462,98.17,17253,99.77,124613,98.33
+Full Study Period (2000–2026),10 km (Primary Grid),1460,Daily,9435,13775100,150939,98.9,17232,99.87,138576,98.99
+Full Study Period (2000–2026),10 km (Primary Grid),1460,Weekly,1348,1968080,109086,94.46,15669,99.2,99384,94.95
+Full Study Period (2000–2026),25 km (Sensitivity Grid),270,Daily,9435,2547450,119717,95.3,15758,99.38,109607,95.7
+Full Study Period (2000–2026),25 km (Sensitivity Grid),270,Weekly,1348,363960,63093,82.66,13395,96.32,56331,84.52
+Sensor Overlap Period (2012–2026),5 km (Nested Grid),5547,Daily,5338,29609886,158693,99.46,11973,99.96,151293,99.49
+Sensor Overlap Period (2012–2026),5 km (Nested Grid),5547,Weekly,763,4232361,130468,96.92,11259,99.73,124613,97.06
+Sensor Overlap Period (2012–2026),10 km (Primary Grid),1460,Daily,5338,7793480,144913,98.14,11206,99.86,138576,98.22
+Sensor Overlap Period (2012–2026),10 km (Primary Grid),1460,Weekly,763,1113980,103632,90.7,10215,99.08,99384,91.08
+Sensor Overlap Period (2012–2026),25 km (Sensitivity Grid),270,Daily,5338,1441260,114129,92.08,10170,99.29,109607,92.4
+Sensor Overlap Period (2012–2026),25 km (Sensitivity Grid),270,Weekly,763,206010,58320,71.69,8622,95.81,56331,72.66

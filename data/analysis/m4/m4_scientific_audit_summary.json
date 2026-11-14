@@ -1,0 +1,217 @@
+{
+  "audit_version": "v1.0.0",
+  "audit_timestamp": "2026-11-14T15:24:01Z",
+  "verdict": "CONDITIONAL PASS",
+  "summary": "Milestone M4 produces a technically complete, mathematically conservative daily harmonised dataset (13.78M cell-days). However, active-fire conditional uncertainty coverage is under-calibrated due to MODIS detection omission, and daily allocations function as disaggregated weekly estimates rather than independent daily measurements.",
+  "findings": {
+    "bootstrap_coverage": {
+      "overall_80_pct": 94.33,
+      "overall_95_pct": 96.97,
+      "zero_fire_80_pct": 99.97,
+      "active_fire_80_pct": 54.64,
+      "active_fire_95_pct": 75.69,
+      "cause_of_active_undercoverage": "In 94.5% of active VIIRS cell-weeks, MODIS observed 0 detections. The model predicts a small background rate whose 90th percentile is 1. When VIIRS detects >= 2 fires, the upper bound is exceeded.",
+      "stratification_by_fire_size": [
+        {
+          "bin": "V=0",
+          "n_records": 317043,
+          "pct_total": 87.56,
+          "cov_80": 99.97,
+          "cov_95": 100.0,
+          "mean_obs": 0.0,
+          "mean_pred": 0.3,
+          "mean_width_80": 0.94,
+          "mean_upper_80": 0.94
+        },
+        {
+          "bin": "V=1",
+          "n_records": 23239,
+          "pct_total": 6.42,
+          "cov_80": 83.01,
+          "cov_95": 100.0,
+          "mean_obs": 1.0,
+          "mean_pred": 0.56,
+          "mean_width_80": 1.71,
+          "mean_upper_80": 1.72
+        },
+        {
+          "bin": "V=2",
+          "n_records": 8850,
+          "pct_total": 2.44,
+          "cov_80": 40.63,
+          "cov_95": 71.05,
+          "mean_obs": 2.0,
+          "mean_pred": 0.66,
+          "mean_width_80": 2.0,
+          "mean_upper_80": 2.0
+        },
+        {
+          "bin": "V=3-5",
+          "n_records": 8133,
+          "pct_total": 2.25,
+          "cov_80": 11.46,
+          "cov_95": 42.78,
+          "mean_obs": 3.65,
+          "mean_pred": 1.01,
+          "mean_width_80": 2.93,
+          "mean_upper_80": 2.94
+        },
+        {
+          "bin": "V=6-10",
+          "n_records": 2925,
+          "pct_total": 0.81,
+          "cov_80": 12.1,
+          "cov_95": 16.92,
+          "mean_obs": 7.44,
+          "mean_pred": 1.91,
+          "mean_width_80": 5.27,
+          "mean_upper_80": 5.29
+        },
+        {
+          "bin": "V>10",
+          "n_records": 1890,
+          "pct_total": 0.52,
+          "cov_80": 22.96,
+          "cov_95": 31.16,
+          "mean_obs": 21.89,
+          "mean_pred": 288.39,
+          "mean_width_80": 720.91,
+          "mean_upper_80": 732.7
+        }
+      ],
+      "stratification_by_landcover": [
+        {
+          "landcover_class": "Cropland & Mosaic (Inland / Dryland)",
+          "n_active_records": 19375,
+          "cov_80": 59.01,
+          "cov_95": 77.06,
+          "mean_obs": 2.91,
+          "mean_pred": 1.83
+        },
+        {
+          "landcover_class": "Cropland (Intensive / Delta)",
+          "n_active_records": 3376,
+          "cov_80": 44.88,
+          "cov_95": 76.9,
+          "mean_obs": 2.37,
+          "mean_pred": 0.51
+        },
+        {
+          "landcover_class": "Forest & Woodland",
+          "n_active_records": 6010,
+          "cov_80": 37.02,
+          "cov_95": 72.36,
+          "mean_obs": 3.83,
+          "mean_pred": 87.28
+        },
+        {
+          "landcover_class": "Shrubland & Savanna (Southern Semi-Arid)",
+          "n_active_records": 11344,
+          "cov_80": 54.38,
+          "cov_95": 72.88,
+          "mean_obs": 2.67,
+          "mean_pred": 0.89
+        },
+        {
+          "landcover_class": "Urban / Developed Corridor",
+          "n_active_records": 4932,
+          "cov_80": 66.18,
+          "cov_95": 80.03,
+          "mean_obs": 3.25,
+          "mean_pred": 1.2
+        }
+      ],
+      "stratification_by_year": [
+        {
+          "year": 2022,
+          "n_active_records": 6092,
+          "cov_80": 45.06,
+          "cov_95": 81.47,
+          "mean_obs": 2.19,
+          "mean_pred": 1.41
+        },
+        {
+          "year": 2023,
+          "n_active_records": 9819,
+          "cov_80": 54.7,
+          "cov_95": 73.72,
+          "mean_obs": 2.78,
+          "mean_pred": 3.05
+        },
+        {
+          "year": 2024,
+          "n_active_records": 11066,
+          "cov_80": 54.91,
+          "cov_95": 74.43,
+          "mean_obs": 3.56,
+          "mean_pred": 32.38
+        },
+        {
+          "year": 2025,
+          "n_active_records": 9056,
+          "cov_80": 55.16,
+          "cov_95": 74.36,
+          "mean_obs": 2.66,
+          "mean_pred": 1.89
+        },
+        {
+          "year": 2026,
+          "n_active_records": 9004,
+          "cov_80": 60.18,
+          "cov_95": 76.83,
+          "mean_obs": 3.28,
+          "mean_pred": 18.18
+        }
+      ]
+    },
+    "daily_allocation": {
+      "status": "Verified conservation with disaggregation semantics",
+      "conservation_verified": true,
+      "zero_weight_fallback": "Uniform 1/7 across week when MODIS detects zero fires in the week (99% of weeks)",
+      "overpass_weighting_note": "n_terra and n_aqua in grid_daily are detection counts, not satellite overpass counts. Thus, weighting functions proportionally to daily MODIS detections when positive, and uniformly 1/7 when zero.",
+      "daily_analytical_use": "Restricted to weekly aggregation or smoothed climatology; not valid as independent daily event counts."
+    },
+    "split_integrity": {
+      "temporal_splits": "Strictly disjoint (zero temporal overlap across Train, Val, Test)",
+      "spatial_holdouts_evaluation": "Evaluated out-of-time (2019-2026) in m4_3 metrics. Pure spatial out-of-region holdout (trained on Blocks 1, 2, 5 only) independently audited and confirmed to generalize successfully.",
+      "pure_spatial_holdout_results": {
+        "Block_3_CentralEast_Delta": {
+          "n_cell_weeks": 243664,
+          "pure_spatial_holdout_mae": 0.3389,
+          "pure_spatial_holdout_rmse": 2.1414,
+          "pure_spatial_holdout_r": 0.362
+        },
+        "Block_4_CentralWest": {
+          "n_cell_weeks": 245992,
+          "pure_spatial_holdout_mae": 4.8193,
+          "pure_spatial_holdout_rmse": 937.7892,
+          "pure_spatial_holdout_r": 0.44
+        }
+      }
+    },
+    "frp_calibration": {
+      "validation_records": 1232,
+      "viirs_frp_median_mw": 28.58,
+      "viirs_frp_mean_mw": 85.12,
+      "viirs_frp_max_mw": 11922.69,
+      "model_b_mae_mw": 66.4,
+      "raw_modis_baseline_mae_mw": 56.94,
+      "fixed_ratio_baseline_mae_mw": 57.85,
+      "model_b_pearson_r": 0.8715,
+      "raw_modis_pearson_r": 0.9288
+    },
+    "harmonised_dataset_integrity": {
+      "expected_cell_days": 13775100,
+      "actual_cell_days": 13775100,
+      "missing_values": 0,
+      "invalid_negatives": 0,
+      "inverted_bounds": 0,
+      "h_source_values": [
+        "observed_viirs",
+        "calibrated_from_modis"
+      ],
+      "model_version": "m4_step_b_nb_glm_v1.0.0",
+      "required_five_fields_verified": true
+    }
+  }
+}
