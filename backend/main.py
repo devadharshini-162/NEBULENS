@@ -80,6 +80,24 @@ app.include_router(hotspots.router, prefix=api_v1_prefix)
 app.include_router(analysis.router, prefix=api_v1_prefix)
 app.include_router(export.router, prefix=api_v1_prefix)
 
+# Serve Frontend static assets if available (production / Docker build)
+import os
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
+
+frontend_dist = os.path.join(os.path.dirname(os.path.dirname(__file__)), "frontend", "dist")
+if os.path.exists(frontend_dist):
+    app.mount("/assets", StaticFiles(directory=os.path.join(frontend_dist, "assets")), name="static_assets")
+    
+    # Catch-all route to serve React's index.html for SPA routing
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa(full_path: str):
+        target_path = os.path.join(frontend_dist, full_path)
+        if full_path and os.path.exists(target_path) and os.path.isfile(target_path):
+            return FileResponse(target_path)
+        return FileResponse(os.path.join(frontend_dist, "index.html"))
+
+
 
 if __name__ == "__main__":
     import uvicorn
