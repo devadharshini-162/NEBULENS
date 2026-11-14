@@ -38,9 +38,8 @@ coverage.xml
 .ipynb_checkpoints/
 *.ipynb_checkpoints/
 
-# --- Data — never commit raw downloads or generated datasets ---
+# --- Data — never commit raw downloads ---
 data/raw/
-data/parquet/
 
 # --- IDE and OS artefacts ---
 .DS_Store
