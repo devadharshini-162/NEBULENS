@@ -28,19 +28,32 @@ const InsetMapController: React.FC<{ bounds: L.LatLngBoundsExpression | null }> 
 interface DrawControllerProps {
   drawMode: boolean;
   onPolygonComplete: (latlngs: [number, number][]) => void;
+  setPointCount: (n: number) => void;
 }
 
-const DrawController: React.FC<DrawControllerProps> = ({ drawMode, onPolygonComplete }) => {
+const DrawController: React.FC<DrawControllerProps> = ({ drawMode, onPolygonComplete, setPointCount }) => {
   const map = useMap();
   const pointsRef = useRef<[number, number][]>([]);
   const polylineRef = useRef<L.Polyline | null>(null);
   const markerGroupRef = useRef<L.LayerGroup | null>(null);
 
   useEffect(() => {
+    if (drawMode) {
+      map.doubleClickZoom.disable();
+    } else {
+      map.doubleClickZoom.enable();
+    }
+    return () => {
+      map.doubleClickZoom.enable();
+    };
+  }, [drawMode, map]);
+
+  useEffect(() => {
     if (!drawMode) {
       polylineRef.current?.remove();
       markerGroupRef.current?.clearLayers();
       pointsRef.current = [];
+      setPointCount(0);
       return;
     }
 
@@ -52,15 +65,40 @@ const DrawController: React.FC<DrawControllerProps> = ({ drawMode, onPolygonComp
 
     const handleClick = (e: L.LeafletMouseEvent) => {
       const pt: [number, number] = [e.latlng.lat, e.latlng.lng];
-      pointsRef.current = [...pointsRef.current, pt];
 
+      // Auto-close if clicked near the first point and >= 3 points
+      if (pointsRef.current.length >= 3) {
+        const first = pointsRef.current[0];
+        const p1 = map.latLngToLayerPoint(L.latLng(pt[0], pt[1]));
+        const p0 = map.latLngToLayerPoint(L.latLng(first[0], first[1]));
+        const pixelDist = Math.hypot(p1.x - p0.x, p1.y - p0.y);
+        if (pixelDist < 25) {
+          onPolygonComplete([...pointsRef.current]);
+          polylineRef.current?.remove();
+          markerGroupRef.current?.clearLayers();
+          pointsRef.current = [];
+          setPointCount(0);
+          map.getContainer().style.cursor = '';
+          return;
+        }
+      }
+
+      pointsRef.current = [...pointsRef.current, pt];
+      setPointCount(pointsRef.current.length);
+
+      const isFirst = pointsRef.current.length === 1;
       const dot = L.circleMarker(e.latlng, {
-        radius: 5,
-        color: '#facc15',
-        fillColor: '#facc15',
+        radius: isFirst ? 7 : 5,
+        color: isFirst ? '#ef4444' : '#facc15',
+        fillColor: isFirst ? '#f87171' : '#facc15',
         fillOpacity: 1,
         weight: 2,
       });
+
+      if (isFirst) {
+        dot.bindTooltip('First point: click here or double-click to close', { permanent: false });
+      }
+
       markerGroupRef.current?.addLayer(dot);
 
       polylineRef.current?.remove();
@@ -74,6 +112,9 @@ const DrawController: React.FC<DrawControllerProps> = ({ drawMode, onPolygonComp
 
     const handleDblClick = (e: L.LeafletMouseEvent) => {
       L.DomEvent.stopPropagation(e);
+      if (e.originalEvent) {
+        L.DomEvent.preventDefault(e.originalEvent);
+      }
       const pts = [...pointsRef.current];
       if (pts.length >= 3) {
         onPolygonComplete(pts);
@@ -81,6 +122,7 @@ const DrawController: React.FC<DrawControllerProps> = ({ drawMode, onPolygonComp
       polylineRef.current?.remove();
       markerGroupRef.current?.clearLayers();
       pointsRef.current = [];
+      setPointCount(0);
       map.getContainer().style.cursor = '';
     };
 
@@ -94,8 +136,9 @@ const DrawController: React.FC<DrawControllerProps> = ({ drawMode, onPolygonComp
       polylineRef.current?.remove();
       markerGroupRef.current?.clearLayers();
       pointsRef.current = [];
+      setPointCount(0);
     };
-  }, [drawMode, map, onPolygonComplete]);
+  }, [drawMode, map, onPolygonComplete, setPointCount]);
 
   return null;
 };
@@ -153,6 +196,7 @@ export const MapView: React.FC = () => {
   const showHotspots = true;
   const [basemap, setBasemap] = useState<'satellite' | 'street'>('satellite');
   const [drawMode, setDrawMode] = useState<boolean>(false);
+  const [drawnPointsCount, setDrawnPointsCount] = useState<number>(0);
 
   const mapExportRef = useRef<HTMLDivElement>(null);
 
@@ -405,8 +449,30 @@ export const MapView: React.FC = () => {
               title="Draw Polygon Area"
             >
               <Pencil size={14} />
-              <span>{drawMode ? 'Drawing (Double-Click to Close)' : 'Draw Area of Interest'}</span>
+              <span>
+                {drawMode
+                  ? drawnPointsCount >= 3
+                    ? `Finish Polygon (${drawnPointsCount} pts)`
+                    : `Click map to place points (${drawnPointsCount})`
+                  : 'Draw Area of Interest'}
+              </span>
             </button>
+
+            {drawMode && drawnPointsCount >= 3 && (
+              <button
+                type="button"
+                className="conae-tool-btn success"
+                style={{ backgroundColor: '#15803d', borderColor: '#22c55e', color: '#ffffff' }}
+                onClick={() => {
+                  // Finalise button clicked
+                  const event = new MouseEvent('dblclick', { bubbles: true });
+                  window.dispatchEvent(event);
+                }}
+                title="Complete and Calculate Area"
+              >
+                <span>Save Area</span>
+              </button>
+            )}
 
             {activePolygon && (
               <button
@@ -461,7 +527,11 @@ export const MapView: React.FC = () => {
               />
             )}
 
-            <DrawController drawMode={drawMode} onPolygonComplete={handlePolygonComplete} />
+            <DrawController
+              drawMode={drawMode}
+              onPolygonComplete={handlePolygonComplete}
+              setPointCount={setDrawnPointsCount}
+            />
             <DrawnPolygonLayer polygon={activePolygon || null} />
 
             {showGrid && gridGeo && (
